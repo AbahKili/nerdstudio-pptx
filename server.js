@@ -201,7 +201,10 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
       elapsed,
       slidesURL: uploadResult?.slidesURL || null,
       thumbnailURL: thumbnailPath ? `/convert/${id}/thumbnail` : null,
-      message: `${slideCount} slide siap. Preview di bawah.`,
+      hasLicense,
+      message: hasLicense
+        ? `${slideCount} slide bersih siap di Google Slides kamu.`
+        : `${slideCount} slide siap. Subscribe untuk menghapus watermark.`,
     });
 
     await notifyWA(`[PPTX] Selesai! ${slideCount} slide (job ${id})`).catch(() => {});

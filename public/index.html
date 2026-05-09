@@ -352,7 +352,16 @@ function listenSSE(streamURL) {
     if (data.stage === 'done') {
       es.close();
       document.getElementById('progress-fill').style.width = '100%';
-      setTimeout(() => showPreview(data), 500);
+      if (data.hasLicense) {
+        // Clean output — skip paywall, go straight to download
+        currentJobResult = data;
+        document.getElementById('download-info').textContent =
+          `${data.slideCount} clean slides · ${Math.round(data.elapsed/1000)}s · Shared to your Drive`;
+        document.getElementById('download-link').href = `/download/${currentJobId}?key=${activeLicense}`;
+        showState('download');
+      } else {
+        setTimeout(() => showPreview(data), 500);
+      }
       return;
     }
 
