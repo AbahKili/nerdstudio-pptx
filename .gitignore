@@ -1,4 +1,10 @@
-.temp
 node_modules
+temp/
 data.db
+data.db-shm
+data.db-wal
 auth_info_baileys
+.claude-flow/
+start.sh
+*.pptx
+whatsapp.js
