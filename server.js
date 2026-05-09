@@ -100,7 +100,7 @@ function extractDesignName(url) {
   }
 }
 
-async function processJob(id, designURL, userEmail) {
+async function processJob(id, designURL, userEmail, googleToken) {
   const startTime = Date.now();
   const jobDir = path.join(TEMP_DIR, id);
   const designName = extractDesignName(designURL);
@@ -178,9 +178,9 @@ async function processJob(id, designURL, userEmail) {
 
     let uploadResult = null;
     try {
-      uploadResult = await uploadAndConvert(pptxPath, designName);
-      // Share with user's Gmail immediately as part of conversion
-      if (userEmail && uploadResult?.fileId) {
+      uploadResult = await uploadAndConvert(pptxPath, designName, googleToken || null);
+      // If using our service account (no user token), share with user's email
+      if (!googleToken && userEmail && uploadResult?.fileId) {
         try {
           await shareWithEmail(uploadResult.fileId, userEmail);
           emit({ stage: 'shared', message: `Slides dibagikan ke ${userEmail} sebagai editor` });
@@ -219,7 +219,7 @@ async function processJob(id, designURL, userEmail) {
 
 // Initiate conversion
 app.post('/convert', (req, res) => {
-  const { designURL, email } = req.body || {};
+  const { designURL, email, googleToken } = req.body || {};
   if (!designURL || typeof designURL !== 'string') {
     return res.status(400).json({ error: 'Field "designURL" wajib diisi' });
   }
@@ -229,7 +229,7 @@ app.post('/convert', (req, res) => {
 
   const id = uuidv4();
   sseClients.set(id, new Set());
-  processJob(id, designURL, email || null).catch(err => console.error(`[job ${id}] Fatal:`, err));
+  processJob(id, designURL, email || null, googleToken || null).catch(err => console.error(`[job ${id}] Fatal:`, err));
   res.json({ id, streamURL: `/convert/${id}/stream` });
 });
 

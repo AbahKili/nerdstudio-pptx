@@ -7,6 +7,7 @@
   <meta name="description" content="Turn Claude Designs into Google Slides instantly. Delivered to your Google Drive. Preview free." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root {
@@ -147,12 +148,18 @@
     <input class="url-input" id="design-url" type="url"
            placeholder="https://api.anthropic.com/v1/design/h/..."
            autocomplete="off" style="margin-bottom:0.5rem;" />
-    <input class="url-input" id="user-email" type="email"
-           placeholder="your@gmail.com — we'll share the Slides here"
-           autocomplete="off" style="margin-bottom:0.5rem;" />
+    <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.5rem;">
+      <input class="url-input" id="user-email" type="email"
+             placeholder="your@gmail.com"
+             autocomplete="off" style="flex:1;margin-bottom:0;" />
+      <button class="btn btn-outline" onclick="googleSignIn()" id="google-btn" style="width:auto;padding:0.7rem 1rem;white-space:nowrap;font-size:0.78rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;margin-right:4px;"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Sign In
+      </button>
+    </div>
     <div class="error-msg" id="input-error"></div>
-    <button class="btn btn-primary" id="btn-convert" onclick="startConvert()">Convert & Share →</button>
-    <p class="trust">Shared to your Gmail as editor. Subscribe to remove watermark.</p>
+    <button class="btn btn-primary" id="btn-convert" onclick="startConvert()">Convert to My Drive →</button>
+    <p class="trust">Uploads directly to your Google Drive. <span style="color:var(--accent);">You own the file.</span></p>
 
     <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;text-align:center;">
       <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.4rem;">Already subscribed?</p>
@@ -220,6 +227,51 @@
 let currentJobId = null;
 let currentJobResult = null;
 let activeLicense = localStorage.getItem('pptx-key') || '';
+let googleToken = localStorage.getItem('pptx-google-token') || '';
+let googleEmail = localStorage.getItem('pptx-google-email') || '';
+
+// Google OAuth — using Google Identity Services
+const GOOGLE_CLIENT_ID = '732178764042-thir2pl44efr33rova16ob2dun2q4o7p.apps.googleusercontent.com';
+
+function googleSignIn() {
+  const tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/drive.file email profile',
+    callback: (response) => {
+      if (response.access_token) {
+        googleToken = response.access_token;
+        localStorage.setItem('pptx-google-token', googleToken);
+        // Get user email
+        fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+          headers: { Authorization: `Bearer ${googleToken}` }
+        }).then(r => r.json()).then(data => {
+          googleEmail = data.email;
+          localStorage.setItem('pptx-google-email', googleEmail);
+          updateGoogleUI();
+        }).catch(() => {});
+      }
+    },
+  });
+  tokenClient.requestAccessToken({ prompt: 'consent' });
+}
+
+function updateGoogleUI() {
+  const btn = document.getElementById('google-btn');
+  const emailInput = document.getElementById('user-email');
+  if (googleEmail) {
+    btn.innerHTML = '✓ Signed In';
+    btn.style.borderColor = 'var(--accent)';
+    btn.style.color = 'var(--accent)';
+    emailInput.value = googleEmail;
+    emailInput.style.borderColor = 'var(--accent)';
+    emailInput.readOnly = true;
+  }
+}
+
+// Init — restore saved Google session
+if (googleEmail) {
+  updateGoogleUI();
+}
 
 // Init — check saved key
 if (activeLicense) {
@@ -272,7 +324,7 @@ function startConvert() {
 
   fetch('/convert', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({designURL: url, email})
+    body: JSON.stringify({designURL: url, email, googleToken})
   }).then(r => r.json()).then(data => {
     if (data.error) {
       showError(data.error, false); return;

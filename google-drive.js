@@ -55,8 +55,8 @@ async function getAccessToken() {
   return data.access_token;
 }
 
-async function uploadAndConvert(pptxPath, designName) {
-  const token = await getAccessToken();
+async function uploadAndConvert(pptxPath, designName, userToken) {
+  const token = userToken || await getAccessToken();
   const pptxBuffer = fs.readFileSync(pptxPath);
 
   // Step 1: Upload with conversion
