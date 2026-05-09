@@ -30,7 +30,7 @@ function startStaticServer(dir, port) {
   });
 }
 
-async function htmlToPptx(projectDir, htmlFileName, onProgress) {
+async function htmlToPptx(projectDir, htmlFileName, onProgress, watermark) {
   let server;
   let browser;
   const port = 9800 + Math.floor(Math.random() * 100);
@@ -99,6 +99,25 @@ async function htmlToPptx(projectDir, htmlFileName, onProgress) {
     });
 
     onProgress({ stage: 'converting', current: Math.floor(slideCount / 2), total: slideCount });
+
+    // Inject watermark if not licensed
+    if (watermark !== false) {
+      await page.evaluate(() => {
+        const sections = document.querySelectorAll('deck-stage section');
+        sections.forEach(s => {
+          const overlay = document.createElement('div');
+          overlay.className = 'nrd-watermark';
+          overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9999;';
+          const text = document.createElement('div');
+          text.style.cssText = 'color:rgba(34,197,94,0.12);font-size:clamp(3rem,8vw,8rem);font-weight:900;font-family:sans-serif;transform:rotate(-25deg);white-space:nowrap;letter-spacing:0.05em;';
+          text.textContent = 'PREVIEW';
+          overlay.appendChild(text);
+          s.style.position = s.style.position || 'relative';
+          s.appendChild(overlay);
+        });
+      });
+      await new Promise(r => setTimeout(r, 300));
+    }
 
     // Inject dom-to-pptx
     await page.addScriptTag({

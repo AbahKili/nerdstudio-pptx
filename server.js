@@ -100,7 +100,7 @@ function extractDesignName(url) {
   }
 }
 
-async function processJob(id, designURL, userEmail, googleToken) {
+async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
   const startTime = Date.now();
   const jobDir = path.join(TEMP_DIR, id);
   const designName = extractDesignName(designURL);
@@ -159,7 +159,7 @@ async function processJob(id, designURL, userEmail, googleToken) {
 
     let result;
     try {
-      result = await htmlToPptx(found.dir, found.file, emit);
+      result = await htmlToPptx(found.dir, found.file, emit, !hasLicense);
     } catch (convertErr) {
       emit({ stage: 'error', message: `Gagal mengkonversi slide: ${convertErr.message}`, retry: true });
       await notifyWA(`[PPTX] Gagal konversi (job ${id}): ${convertErr.message}`).catch(() => {});
@@ -219,7 +219,7 @@ async function processJob(id, designURL, userEmail, googleToken) {
 
 // Initiate conversion
 app.post('/convert', (req, res) => {
-  const { designURL, email, googleToken } = req.body || {};
+  const { designURL, email, googleToken, licenseKey } = req.body || {};
   if (!designURL || typeof designURL !== 'string') {
     return res.status(400).json({ error: 'Field "designURL" wajib diisi' });
   }
@@ -227,9 +227,18 @@ app.post('/convert', (req, res) => {
     return res.status(400).json({ error: 'URL harus dari Claude Design (api.anthropic.com/v1/design/h/...)' });
   }
 
+  // Check if user has a valid license (watermark-free conversion)
+  let hasLicense = false;
+  if (licenseKey) {
+    const license = db.verifyKey(licenseKey);
+    if (license && db.checkQuota(license)) {
+      hasLicense = true;
+    }
+  }
+
   const id = uuidv4();
   sseClients.set(id, new Set());
-  processJob(id, designURL, email || null, googleToken || null).catch(err => console.error(`[job ${id}] Fatal:`, err));
+  processJob(id, designURL, email || null, googleToken || null, hasLicense).catch(err => console.error(`[job ${id}] Fatal:`, err));
   res.json({ id, streamURL: `/convert/${id}/stream` });
 });
 
