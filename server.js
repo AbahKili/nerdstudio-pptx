@@ -22,6 +22,9 @@ const LEMON_SQUEEZY_SECRET = process.env.LEMON_SQUEEZY_SECRET || '';
 // In-memory job tracking
 const sseClients = new Map();
 const jobResults = new Map(); // jobId -> { pptxPath, slideCount, uploadResult }
+let activeJobs = 0;
+const MAX_CONCURRENT = 1; // Only 1 conversion at a time (VPS RAM limit)
+const jobQueue = [];
 
 db.init();
 
@@ -112,11 +115,11 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
     try {
       response = await fetch(designURL);
     } catch (fetchErr) {
-      emit({ stage: 'error', message: `Gagal mendownload bundle: ${fetchErr.message}`, retry: true });
+      emit({ stage: 'error', message: `Failed to download bundle: ${fetchErr.message}`, retry: true });
       return;
     }
     if (!response.ok) {
-      emit({ stage: 'error', message: `Gagal mendownload bundle: HTTP ${response.status}`, retry: false });
+      emit({ stage: 'error', message: `Failed to download bundle: HTTP ${response.status}`, retry: false });
       return;
     }
 
@@ -126,7 +129,7 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
     try {
       bundleBuffer = await response.buffer();
     } catch (bufErr) {
-      emit({ stage: 'error', message: `Gagal membaca bundle: ${bufErr.message}`, retry: true });
+      emit({ stage: 'error', message: `Failed to read bundle: ${bufErr.message}`, retry: true });
       return;
     }
 
@@ -136,7 +139,7 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
       try {
         tarBuffer = zlib.gunzipSync(bundleBuffer);
       } catch (e) {
-        emit({ stage: 'error', message: 'Gagal dekompresi bundle', retry: false });
+        emit({ stage: 'error', message: 'Failed to decompress bundle', retry: false });
         return;
       }
     }
@@ -146,14 +149,14 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
       maxBuffer: 200 * 1024 * 1024,
     });
     if (tarResult.error || tarResult.status !== 0) {
-      emit({ stage: 'error', message: 'Bundle tar rusak atau tidak valid', retry: false });
+      emit({ stage: 'error', message: 'Invalid or corrupt tar bundle', retry: false });
       return;
     }
 
     emit({ stage: 'converting', message: 'Mengkonversi slide ke PPTX...' });
     const found = findHTMLFile(jobDir);
     if (!found) {
-      emit({ stage: 'error', message: 'Tidak ditemukan file HTML dalam bundle', retry: false });
+      emit({ stage: 'error', message: 'No HTML file found in bundle', retry: false });
       return;
     }
 
@@ -161,13 +164,13 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
     try {
       result = await htmlToPptx(found.dir, found.file, emit, !hasLicense);
     } catch (convertErr) {
-      emit({ stage: 'error', message: `Gagal mengkonversi slide: ${convertErr.message}`, retry: true });
+      emit({ stage: 'error', message: `Failed to convert slides: ${convertErr.message}`, retry: true });
       return;
     }
 
     const { pptxBuffer, slideCount, thumbnailPath } = result;
     if (slideCount === 0) {
-      emit({ stage: 'error', message: 'Tidak ada slide ditemukan dalam desain', retry: false });
+      emit({ stage: 'error', message: 'No slides found in design', retry: false });
       return;
     }
 
@@ -182,7 +185,7 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
       if (!googleToken && userEmail && uploadResult?.fileId) {
         try {
           await shareWithEmail(uploadResult.fileId, userEmail);
-          emit({ stage: 'shared', message: `Slides dibagikan ke ${userEmail} sebagai editor` });
+          emit({ stage: 'shared', message: `Slides shared with ${userEmail} as editor` });
         } catch (shareErr) {
           console.error(`[share] Error: ${shareErr.message}`);
         }
@@ -202,8 +205,8 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
       thumbnailURL: thumbnailPath ? `/convert/${id}/thumbnail` : null,
       hasLicense,
       message: hasLicense
-        ? `${slideCount} slide bersih siap di Google Slides kamu.`
-        : `${slideCount} slide siap. Subscribe untuk menghapus watermark.`,
+        ? `${slideCount} clean slides ready in your Google Slides.`
+        : `${slideCount} slides ready. Subscribe to remove watermark.`,
     });
 
   } catch (err) {
@@ -220,10 +223,10 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
 app.post('/convert', (req, res) => {
   const { designURL, email, googleToken, licenseKey } = req.body || {};
   if (!designURL || typeof designURL !== 'string') {
-    return res.status(400).json({ error: 'Field "designURL" wajib diisi' });
+    return res.status(400).json({ error: '"designURL" is required' });
   }
   if (!isValidDesignURL(designURL)) {
-    return res.status(400).json({ error: 'URL harus dari Claude Design (api.anthropic.com/v1/design/h/...)' });
+    return res.status(400).json({ error: 'URL must be a Claude Design link (api.anthropic.com/v1/design/h/...)' });
   }
 
   // Check if user has a valid license (watermark-free conversion)
@@ -237,14 +240,33 @@ app.post('/convert', (req, res) => {
 
   const id = uuidv4();
   sseClients.set(id, new Set());
-  processJob(id, designURL, email || null, googleToken || null, hasLicense).catch(err => console.error(`[job ${id}] Fatal:`, err));
-  res.json({ id, streamURL: `/convert/${id}/stream` });
+
+  if (activeJobs >= MAX_CONCURRENT) {
+    // Queue the job
+    res.json({ id, streamURL: `/convert/${id}/stream`, queued: true });
+    jobQueue.push({ id, designURL, email, googleToken, hasLicense });
+  } else {
+    activeJobs++;
+    processJob(id, designURL, email || null, googleToken || null, hasLicense)
+      .finally(() => {
+        activeJobs--;
+        // Process next job in queue
+        if (jobQueue.length > 0) {
+          const next = jobQueue.shift();
+          activeJobs++;
+          processJob(next.id, next.designURL, next.email || null, next.googleToken || null, next.hasLicense)
+            .finally(() => { activeJobs--; });
+        }
+      })
+      .catch(err => console.error(`[job ${id}] Fatal:`, err));
+    res.json({ id, streamURL: `/convert/${id}/stream` });
+  }
 });
 
 // SSE progress stream
 app.get('/convert/:id/stream', (req, res) => {
   const { id } = req.params;
-  if (!sseClients.has(id)) return res.status(404).json({ error: 'Job tidak ditemukan' });
+  if (!sseClients.has(id)) return res.status(404).json({ error: 'Job not found' });
 
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
@@ -279,7 +301,7 @@ app.get('/convert/:id/thumbnail', (req, res) => {
   const { id } = req.params;
   const result = jobResults.get(id);
   if (!result || !result.thumbnailPath) {
-    return res.status(404).json({ error: 'Thumbnail tidak tersedia' });
+    return res.status(404).json({ error: 'Thumbnail not available' });
   }
   res.set({ 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' });
   res.sendFile(result.thumbnailPath);
@@ -292,13 +314,13 @@ app.get('/download/:id', async (req, res) => {
   if (!key) return res.status(401).json({ error: 'License key required. Subscribe at nerdstudio.online' });
 
   const license = db.verifyKey(key);
-  if (!license) return res.status(401).json({ error: 'License key tidak valid atau sudah expired' });
+  if (!license) return res.status(401).json({ error: 'Invalid or expired license key' });
   if (!db.checkQuota(license)) {
-    return res.status(429).json({ error: 'Batas konversi bulan ini tercapai. Upgrade your plan.' });
+    return res.status(429).json({ error: 'Monthly conversion limit reached. Upgrade your plan.' });
   }
 
   const result = jobResults.get(id);
-  if (!result) return res.status(404).json({ error: 'File tidak ditemukan' });
+  if (!result) return res.status(404).json({ error: 'File not found' });
 
   db.recordConversion(key, result.slideCount);
 
