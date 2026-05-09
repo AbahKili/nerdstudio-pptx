@@ -204,12 +204,13 @@
   <div class="card state" id="state-download">
     <div class="done-box">
       <div class="check">✅</div>
-      <h2>Download Ready</h2>
+      <h2>Ready in Your Drive</h2>
       <p class="meta" id="download-info"></p>
       <div class="link-row">
-        <a class="btn btn-primary" id="download-link" href="#">Download PPTX</a>
+        <a class="btn btn-primary" id="slides-link" href="#" target="_blank">Open in Google Slides</a>
+        <a class="btn btn-outline" id="download-link" href="#">Download PPTX</a>
       </div>
-      <p style="text-align:center;color:var(--dim);font-size:0.65rem;margin-top:0.4rem;">Google Slides already shared to your Gmail</p>
+      <p style="text-align:center;color:var(--dim);font-size:0.65rem;margin-top:0.4rem;">You own this file — it's in your Google Drive</p>
     </div>
   </div>
 
@@ -356,8 +357,12 @@ function listenSSE(streamURL) {
         // Clean output — skip paywall, go straight to download
         currentJobResult = data;
         document.getElementById('download-info').textContent =
-          `${data.slideCount} clean slides · ${Math.round(data.elapsed/1000)}s · Shared to your Drive`;
+          `${data.slideCount} clean slides · ${Math.round(data.elapsed/1000)}s · You own this file`;
         document.getElementById('download-link').href = `/download/${currentJobId}?key=${activeLicense}`;
+        if (data.slidesURL) {
+          document.getElementById('slides-link').href = data.slidesURL;
+          document.getElementById('slides-link').style.display = '';
+        }
         showState('download');
       } else {
         setTimeout(() => showPreview(data), 500);
