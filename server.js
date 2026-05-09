@@ -100,7 +100,7 @@ function extractDesignName(url) {
   }
 }
 
-async function processJob(id, designURL) {
+async function processJob(id, designURL, userEmail) {
   const startTime = Date.now();
   const jobDir = path.join(TEMP_DIR, id);
   const designName = extractDesignName(designURL);
@@ -179,12 +179,21 @@ async function processJob(id, designURL) {
     let uploadResult = null;
     try {
       uploadResult = await uploadAndConvert(pptxPath, designName);
+      // Share with user's Gmail immediately as part of conversion
+      if (userEmail && uploadResult?.fileId) {
+        try {
+          await shareWithEmail(uploadResult.fileId, userEmail);
+          emit({ stage: 'shared', message: `Slides dibagikan ke ${userEmail} sebagai editor` });
+        } catch (shareErr) {
+          console.error(`[share] Error: ${shareErr.message}`);
+        }
+      }
     } catch (uploadErr) {
       // Non-fatal — user can still download locally
     }
 
     const elapsed = Date.now() - startTime;
-    jobResults.set(id, { pptxPath, slideCount, uploadResult, thumbnailPath });
+    jobResults.set(id, { pptxPath, slideCount, uploadResult, thumbnailPath, userEmail, designName });
 
     emit({
       stage: 'done',
@@ -210,7 +219,7 @@ async function processJob(id, designURL) {
 
 // Initiate conversion
 app.post('/convert', (req, res) => {
-  const { designURL } = req.body || {};
+  const { designURL, email } = req.body || {};
   if (!designURL || typeof designURL !== 'string') {
     return res.status(400).json({ error: 'Field "designURL" wajib diisi' });
   }
@@ -220,7 +229,7 @@ app.post('/convert', (req, res) => {
 
   const id = uuidv4();
   sseClients.set(id, new Set());
-  processJob(id, designURL).catch(err => console.error(`[job ${id}] Fatal:`, err));
+  processJob(id, designURL, email || null).catch(err => console.error(`[job ${id}] Fatal:`, err));
   res.json({ id, streamURL: `/convert/${id}/stream` });
 });
 
@@ -283,23 +292,9 @@ app.get('/download/:id', async (req, res) => {
   const result = jobResults.get(id);
   if (!result) return res.status(404).json({ error: 'File tidak ditemukan' });
 
-  // Share Google Slides with user's email if provided
-  let shareStatus = null;
-  if (email && result.uploadResult?.fileId) {
-    try {
-      const shared = await shareWithEmail(result.uploadResult.fileId, email);
-      shareStatus = shared ? 'shared' : 'failed';
-    } catch (err) {
-      console.error(`[share] Error: ${err.message}`);
-      shareStatus = 'failed';
-    }
-  }
-
   db.recordConversion(key, result.slideCount);
 
-  // Set download filename from design
-  const filename = `design-${id.slice(0, 8)}.pptx`;
-  res.set('X-Share-Status', shareStatus || 'no-email');
+  const filename = `${(result.designName || 'design').replace(/\s+/g, '-')}-${id.slice(0, 8)}.pptx`;
   res.set('X-Slides-URL', result.uploadResult?.slidesURL || '');
   res.download(result.pptxPath, filename);
 });

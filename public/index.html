@@ -133,7 +133,7 @@
   <!-- STATE: Input -->
   <div class="card state state-input active" id="state-input">
     <h2>Claude Design to Google Slides</h2>
-    <p class="sub">Paste a Claude Design URL. Get a Google Slides file delivered to your Drive. Preview free, subscribe to export.</p>
+    <p class="sub">Paste a Claude Design URL. We'll convert it and share the Slides to your Gmail. Subscribe to remove the watermark.</p>
     <details style="margin-bottom:0.75rem;font-size:0.75rem;color:var(--muted);background:var(--bg);border-radius:8px;padding:0.6rem 0.8rem;">
       <summary style="cursor:pointer;font-weight:600;color:var(--text);">How to get your Claude Design URL →</summary>
       <ol style="margin:0.5rem 0 0 1.2rem;line-height:1.8;">
@@ -146,10 +146,13 @@
     </details>
     <input class="url-input" id="design-url" type="url"
            placeholder="https://api.anthropic.com/v1/design/h/..."
-           autocomplete="off" />
+           autocomplete="off" style="margin-bottom:0.5rem;" />
+    <input class="url-input" id="user-email" type="email"
+           placeholder="your@gmail.com — we'll share the Slides here"
+           autocomplete="off" style="margin-bottom:0.5rem;" />
     <div class="error-msg" id="input-error"></div>
-    <button class="btn btn-primary" id="btn-convert" onclick="startConvert()">Convert →</button>
-    <p class="trust">No account needed. Preview first, pay to download.</p>
+    <button class="btn btn-primary" id="btn-convert" onclick="startConvert()">Convert & Share →</button>
+    <p class="trust">Shared to your Gmail as editor. Subscribe to remove watermark.</p>
 
     <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;text-align:center;">
       <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.4rem;">Already subscribed?</p>
@@ -178,9 +181,10 @@
     <h2 style="text-align:center;font-size:1.2rem;">Preview</h2>
     <p class="sub" id="preview-info"></p>
     <div class="preview-grid" id="preview-grid"></div>
-    <p style="text-align:center;color:var(--muted);font-size:0.75rem;">Watermarked preview</p>
+    <p style="text-align:center;color:var(--muted);font-size:0.75rem;">Watermarked preview. Shared to <span id="preview-email" style="color:var(--accent);"></span></p>
+    <a class="btn btn-outline" id="preview-slides-link" href="#" target="_blank" style="display:block;text-align:center;margin-bottom:0.5rem;">Open in Google Slides →</a>
 
-    <button class="btn btn-purple" id="btn-pay" onclick="startPayment()">Unlock Download — from $3/mo</button>
+    <button class="btn btn-purple" id="btn-pay" onclick="startPayment()">Subscribe to Remove Watermark — from $3/mo</button>
     <p style="text-align:center;color:var(--dim);font-size:0.65rem;margin:0.4rem 0;">or enter your license key</p>
     <div class="key-row">
       <input class="key-input" id="unlock-key" placeholder="pptx-sk-..." style="text-align:center;" />
@@ -193,17 +197,12 @@
   <div class="card state" id="state-download">
     <div class="done-box">
       <div class="check">✅</div>
-      <h2>Google Slides Ready</h2>
+      <h2>Download Ready</h2>
       <p class="meta" id="download-info"></p>
-      <div style="margin-top:0.75rem;">
-        <input class="key-input" id="gmail-input" type="email" placeholder="your@gmail.com" style="margin-bottom:0.5rem;" />
-        <p style="color:var(--dim);font-size:0.65rem;margin-bottom:0.5rem;">Enter your Gmail — we'll share the Slides with you as editor. Open it and make a copy to own it.</p>
-      </div>
       <div class="link-row">
-        <a class="btn btn-primary" id="slides-link" href="#" target="_blank">Open in Google Slides</a>
-        <a class="btn btn-outline" id="download-link" href="#">Download PPTX</a>
+        <a class="btn btn-primary" id="download-link" href="#">Download PPTX</a>
       </div>
-      <p style="text-align:center;color:var(--dim);font-size:0.65rem;margin-top:0.4rem;">Shared as editor → File → Make a copy to own it</p>
+      <p style="text-align:center;color:var(--dim);font-size:0.65rem;margin-top:0.4rem;">Google Slides already shared to your Gmail</p>
     </div>
   </div>
 
@@ -252,6 +251,7 @@ function resetToInput() {
 
 function startConvert() {
   const url = document.getElementById('design-url').value.trim();
+  const email = document.getElementById('user-email').value.trim();
   const errEl = document.getElementById('input-error');
   errEl.classList.remove('show');
 
@@ -261,13 +261,18 @@ function startConvert() {
     errEl.classList.add('show');
     return;
   }
+  if (!email || !email.includes('@')) {
+    errEl.textContent = 'Masukkan Gmail Anda — file Slides akan dibagikan ke email ini';
+    errEl.classList.add('show');
+    return;
+  }
 
   showState('progress');
   document.getElementById('btn-convert').disabled = true;
 
   fetch('/convert', {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({designURL: url})
+    body: JSON.stringify({designURL: url, email})
   }).then(r => r.json()).then(data => {
     if (data.error) {
       showError(data.error, false); return;
@@ -316,6 +321,12 @@ function listenSSE(streamURL) {
 function showPreview(data) {
   currentJobResult = data;
   document.getElementById('preview-info').textContent = `${data.slideCount} slides · ${Math.round(data.elapsed/1000)}s`;
+  if (data.slidesURL) {
+    document.getElementById('preview-slides-link').href = data.slidesURL;
+    document.getElementById('preview-slides-link').style.display = '';
+  } else {
+    document.getElementById('preview-slides-link').style.display = 'none';
+  }
   const grid = document.getElementById('preview-grid');
   grid.innerHTML = '';
 
@@ -412,18 +423,9 @@ function unlockDownload() {
     activeLicense = key;
 
     // Proceed to download
-    const gmail = document.getElementById('gmail-input')?.value?.trim() || '';
     document.getElementById('download-info').textContent =
       `${currentJobResult.slideCount} slides · ${Math.round(currentJobResult.elapsed/1000)}s`;
-    let dlUrl = `/download/${currentJobId}?key=${key}`;
-    if (gmail) dlUrl += `&email=${encodeURIComponent(gmail)}`;
-    document.getElementById('download-link').href = dlUrl;
-    if (currentJobResult.slidesURL) {
-      document.getElementById('slides-link').href = currentJobResult.slidesURL;
-      document.getElementById('slides-link').style.display = '';
-    } else {
-      document.getElementById('slides-link').style.display = 'none';
-    }
+    document.getElementById('download-link').href = `/download/${currentJobId}?key=${key}`;
     showState('download');
   }).catch(()=>{
     errEl.textContent = 'Verification failed. Try again.';
