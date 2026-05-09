@@ -108,15 +108,18 @@ async function uploadAndConvert(pptxPath, designName) {
 async function shareWithEmail(fileId, email) {
   const token = await getAccessToken();
 
-  // Step 1: Share as writer
-  const shareRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=false`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ role: 'writer', type: 'user', emailAddress: email }),
-  });
+  // Share as writer — the user gets full edit access
+  const shareRes = await fetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}/permissions?sendNotificationEmail=true&emailMessage=Your+Google+Slides+from+Nerd+Studio.+Open+and+choose+File+%3E+Make+a+copy+to+own+it.`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ role: 'writer', type: 'user', emailAddress: email }),
+    }
+  );
 
   if (!shareRes.ok) {
     const err = await shareRes.text();
@@ -124,59 +127,7 @@ async function shareWithEmail(fileId, email) {
     return false;
   }
 
-  const perm = await shareRes.json();
-  console.log(`[drive] Shared ${fileId} with ${email} as writer (permId: ${perm.id})`);
-
-  // Step 2: Transfer ownership
-  let transferred = false;
-  try {
-    const transferRes = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${fileId}/permissions/${perm.id}?transferOwnership=true`,
-      {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: 'owner' }),
-      }
-    );
-
-    if (transferRes.ok) {
-      console.log(`[drive] Ownership of ${fileId} transferred to ${email}`);
-      transferred = true;
-    } else {
-      const err = await transferRes.text();
-      console.warn(`[drive] Ownership transfer pending (may need user to accept): ${err}`);
-    }
-  } catch (err) {
-    console.warn(`[drive] Ownership transfer error: ${err.message}`);
-  }
-
-  // Step 3: Remove our access if transfer succeeded
-  if (transferred) {
-    try {
-      // Get current user's permission ID
-      const permsRes = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${fileId}/permissions?fields=permissions(id,emailAddress,role)`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const permsData = await permsRes.json();
-      const myPerm = (permsData.permissions || []).find(p =>
-        p.emailAddress && p.emailAddress.includes('gserviceaccount.com')
-      );
-      if (myPerm) {
-        await fetch(
-          `https://www.googleapis.com/drive/v3/files/${fileId}/permissions/${myPerm.id}`,
-          { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
-        );
-        console.log(`[drive] Removed our access from ${fileId} — user now owns it`);
-      }
-    } catch (err) {
-      console.warn(`[drive] Could not remove our access: ${err.message}`);
-    }
-  }
-
+  console.log(`[drive] Shared ${fileId} with ${email} as writer — they can make a copy to own it`);
   return true;
 }
 

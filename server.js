@@ -83,9 +83,27 @@ function cleanUpSseEntry(id) {
 
 // ── Background job processor ─────────────────────────────────
 
+function extractDesignName(url) {
+  try {
+    const parsed = new URL(url);
+    // Try open_file param first: ?open_file=Cyber+Hero.html
+    const openFile = parsed.searchParams.get('open_file');
+    if (openFile) {
+      return decodeURIComponent(openFile).replace(/\.(html|htm)$/i, '').replace(/\+/g, ' ');
+    }
+    // Fallback: extract from path
+    const parts = parsed.pathname.split('/');
+    const last = parts[parts.length - 1];
+    return last || 'Claude Design';
+  } catch {
+    return 'Claude Design';
+  }
+}
+
 async function processJob(id, designURL) {
   const startTime = Date.now();
   const jobDir = path.join(TEMP_DIR, id);
+  const designName = extractDesignName(designURL);
   const emit = makeEmitter(id);
 
   try {
@@ -160,7 +178,7 @@ async function processJob(id, designURL) {
 
     let uploadResult = null;
     try {
-      uploadResult = await uploadAndConvert(pptxPath, id);
+      uploadResult = await uploadAndConvert(pptxPath, designName);
     } catch (uploadErr) {
       // Non-fatal — user can still download locally
     }
@@ -266,14 +284,24 @@ app.get('/download/:id', async (req, res) => {
   if (!result) return res.status(404).json({ error: 'File tidak ditemukan' });
 
   // Share Google Slides with user's email if provided
+  let shareStatus = null;
   if (email && result.uploadResult?.fileId) {
-    shareWithEmail(result.uploadResult.fileId, email).catch(err =>
-      console.error(`[share] Error: ${err.message}`)
-    );
+    try {
+      const shared = await shareWithEmail(result.uploadResult.fileId, email);
+      shareStatus = shared ? 'shared' : 'failed';
+    } catch (err) {
+      console.error(`[share] Error: ${err.message}`);
+      shareStatus = 'failed';
+    }
   }
 
   db.recordConversion(key, result.slideCount);
-  res.download(result.pptxPath, `design-${id.slice(0, 8)}.pptx`);
+
+  // Set download filename from design
+  const filename = `design-${id.slice(0, 8)}.pptx`;
+  res.set('X-Share-Status', shareStatus || 'no-email');
+  res.set('X-Slides-URL', result.uploadResult?.slidesURL || '');
+  res.download(result.pptxPath, filename);
 });
 
 // Verify license key (for frontend localStorage auto-login)
