@@ -162,7 +162,6 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
       result = await htmlToPptx(found.dir, found.file, emit, !hasLicense);
     } catch (convertErr) {
       emit({ stage: 'error', message: `Gagal mengkonversi slide: ${convertErr.message}`, retry: true });
-      await notifyWA(`[PPTX] Gagal konversi (job ${id}): ${convertErr.message}`).catch(() => {});
       return;
     }
 
@@ -207,12 +206,9 @@ async function processJob(id, designURL, userEmail, googleToken, hasLicense) {
         : `${slideCount} slide siap. Subscribe untuk menghapus watermark.`,
     });
 
-    await notifyWA(`[PPTX] Selesai! ${slideCount} slide (job ${id})`).catch(() => {});
-
   } catch (err) {
     console.error(`[job ${id}] Unhandled:`, err);
     emit({ stage: 'error', message: `Terjadi kesalahan: ${err.message}`, retry: true });
-    await notifyWA(`[PPTX] Error (job ${id}): ${err.message}`).catch(() => {});
   } finally {
     cleanUpSseEntry(id);
   }
