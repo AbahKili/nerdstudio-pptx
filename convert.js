@@ -120,15 +120,35 @@ async function htmlToPptx(projectDir, htmlFileName, onProgress, watermark) {
       });
       await new Promise(r => setTimeout(r, 300));
 
-      // Screenshot each slide element individually
+      // Screenshot each slide individually — hide all, show one at a time
       const slideHandles = await page.$$('deck-stage section');
       const screenshots = [];
-      for (const handle of slideHandles) {
+
+      // First hide all slides
+      await page.evaluate(() => {
+        document.querySelectorAll('deck-stage section').forEach(s => {
+          s.style.display = 'none';
+        });
+      });
+
+      for (let i = 0; i < slideHandles.length; i++) {
         try {
-          const buf = await handle.screenshot({ type: 'png' });
+          // Show only this slide
+          await page.evaluate((idx) => {
+            const sections = document.querySelectorAll('deck-stage section');
+            sections.forEach((s, j) => { s.style.display = j === idx ? '' : 'none'; });
+          }, i);
+          await new Promise(r => setTimeout(r, 200));
+
+          const buf = await page.screenshot({ type: 'png', fullPage: false });
           screenshots.push(buf);
-        } catch { /* skip failed slide */ }
+        } catch { /* skip */ }
       }
+
+      // Restore all slides
+      await page.evaluate(() => {
+        document.querySelectorAll('deck-stage section').forEach(s => { s.style.display = ''; });
+      });
 
       if (screenshots.length === 0) throw new Error('No slides captured');
 
