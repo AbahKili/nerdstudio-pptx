@@ -120,33 +120,17 @@ async function htmlToPptx(projectDir, htmlFileName, onProgress, watermark) {
       });
       await new Promise(r => setTimeout(r, 300));
 
-      // Screenshot each slide as an image
-      const slideImages = await page.evaluate(async () => {
-        const sections = document.querySelectorAll('deck-stage section');
-        const images = [];
-        for (const s of sections) {
-          const rect = s.getBoundingClientRect();
-          if (rect.width > 0 && rect.height > 0) {
-            images.push({ width: Math.round(rect.width), height: Math.round(rect.height) });
-          }
-        }
-        return images;
-      });
-
+      // Screenshot each slide element individually
+      const slideHandles = await page.$$('deck-stage section');
       const screenshots = [];
-      for (let i = 0; i < slideImages.length; i++) {
+      for (const handle of slideHandles) {
         try {
-          // Scroll to slide
-          await page.evaluate((idx) => {
-            const sections = document.querySelectorAll('deck-stage section');
-            if (sections[idx]) sections[idx].scrollIntoView({ behavior: 'instant' });
-          }, i);
-          await new Promise(r => setTimeout(r, 200));
-
-          const buf = await page.screenshot({ type: 'png', fullPage: false });
+          const buf = await handle.screenshot({ type: 'png' });
           screenshots.push(buf);
         } catch { /* skip failed slide */ }
       }
+
+      if (screenshots.length === 0) throw new Error('No slides captured');
 
       // Build PPTX from screenshots using pptxgenjs
       const pptxgen = require('pptxgenjs');
