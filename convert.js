@@ -100,8 +100,10 @@ async function htmlToPptx(projectDir, htmlFileName, onProgress, watermark) {
 
     onProgress({ stage: 'converting', current: Math.floor(slideCount / 2), total: slideCount });
 
-    // Inject watermark if not licensed
+    let pptxBuffer;
+
     if (watermark !== false) {
+      // WATERMARKED PATH: render each slide as a flat image — watermark is pixel-baked, cannot be removed
       await page.evaluate(() => {
         const sections = document.querySelectorAll('deck-stage section');
         sections.forEach(s => {
@@ -109,44 +111,76 @@ async function htmlToPptx(projectDir, htmlFileName, onProgress, watermark) {
           overlay.className = 'nrd-watermark';
           overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:9999;';
           const text = document.createElement('div');
-          text.style.cssText = 'color:rgba(34,197,94,0.12);font-size:clamp(3rem,8vw,8rem);font-weight:900;font-family:sans-serif;transform:rotate(-25deg);white-space:nowrap;letter-spacing:0.05em;';
-          text.textContent = 'PREVIEW';
+          text.style.cssText = 'color:rgba(34,197,94,0.10);font-size:clamp(3rem,8vw,8rem);font-weight:900;font-family:sans-serif;transform:rotate(-25deg);white-space:nowrap;letter-spacing:0.05em;';
+          text.textContent = 'PREVIEW — SUBSCRIBE TO REMOVE';
           overlay.appendChild(text);
           s.style.position = s.style.position || 'relative';
           s.appendChild(overlay);
         });
       });
       await new Promise(r => setTimeout(r, 300));
+
+      // Screenshot each slide as an image
+      const slideImages = await page.evaluate(async () => {
+        const sections = document.querySelectorAll('deck-stage section');
+        const images = [];
+        for (const s of sections) {
+          const rect = s.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            images.push({ width: Math.round(rect.width), height: Math.round(rect.height) });
+          }
+        }
+        return images;
+      });
+
+      const screenshots = [];
+      for (let i = 0; i < slideImages.length; i++) {
+        try {
+          // Scroll to slide
+          await page.evaluate((idx) => {
+            const sections = document.querySelectorAll('deck-stage section');
+            if (sections[idx]) sections[idx].scrollIntoView({ behavior: 'instant' });
+          }, i);
+          await new Promise(r => setTimeout(r, 200));
+
+          const buf = await page.screenshot({ type: 'png', fullPage: false });
+          screenshots.push(buf);
+        } catch { /* skip failed slide */ }
+      }
+
+      // Build PPTX from screenshots using pptxgenjs
+      const pptxgen = require('pptxgenjs');
+      const pres = new pptxgen();
+      pres.layout = 'LAYOUT_WIDE';
+
+      for (const img of screenshots) {
+        const slide = pres.addSlide();
+        slide.addImage({ data: `data:image/png;base64,${img.toString('base64')}`, x: 0, y: 0, w: '100%', h: '100%' });
+      }
+
+      pptxBuffer = await pres.write({ outputType: 'nodebuffer' });
+    } else {
+      // LICENSED PATH: use dom-to-pptx for editable output (no watermark)
+      await page.addScriptTag({
+        url: 'https://cdn.jsdelivr.net/npm/dom-to-pptx@latest/dist/dom-to-pptx.bundle.js',
+      });
+      await page.waitForFunction(() => typeof window.domToPptx !== 'undefined', { timeout: 15000 });
+
+      onProgress({ stage: 'converting', current: slideCount, total: slideCount });
+
+      const result = await page.evaluate(async () => {
+        const sections = document.querySelectorAll('deck-stage section');
+        const { exportToPptx } = window.domToPptx;
+        const blob = await exportToPptx(Array.from(sections), { fileName: 'output.pptx', skipDownload: true });
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve({ base64: reader.result.split(',')[1], size: blob.size });
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      });
+      pptxBuffer = Buffer.from(result.base64, 'base64');
     }
-
-    // Inject dom-to-pptx
-    await page.addScriptTag({
-      url: 'https://cdn.jsdelivr.net/npm/dom-to-pptx@latest/dist/dom-to-pptx.bundle.js',
-    });
-
-    await page.waitForFunction(() => typeof window.domToPptx !== 'undefined', { timeout: 15000 });
-
-    onProgress({ stage: 'converting', current: slideCount, total: slideCount });
-
-    // Run export
-    const result = await page.evaluate(async () => {
-      const sections = document.querySelectorAll('deck-stage section');
-      const { exportToPptx } = window.domToPptx;
-
-      const blob = await exportToPptx(Array.from(sections), {
-        fileName: 'output.pptx',
-        skipDownload: true,
-      });
-
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve({ base64: reader.result.split(',')[1], size: blob.size });
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    });
-
-    const pptxBuffer = Buffer.from(result.base64, 'base64');
     onProgress({ stage: 'uploading' });
 
     return { pptxBuffer, slideCount, thumbnailPath };
