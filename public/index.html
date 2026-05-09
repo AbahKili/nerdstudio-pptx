@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nerd Studio — Claude Design to Google Slides</title>
+  <meta name="description" content="Turn Claude Designs into Google Slides instantly. Delivered to your Google Drive. Preview free." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root {
+      --bg:#020617;--surface:#0f172a;--border:#1e293b;
+      --accent:#22c55e;--accent-glow:rgba(34,197,94,0.12);
+      --text:#f8fafc;--muted:#94a3b8;--dim:#64748b;
+      --red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;
+    }
+    body {
+      font-family:'DM Sans',-apple-system,sans-serif;
+      background:var(--bg);color:var(--text);
+      min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      padding:2rem 1.5rem;
+    }
+    h1,h2,h3{font-family:'Space Grotesk',sans-serif}
+    a{color:var(--accent);text-decoration:none}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    .container{max-width:520px;width:100%}
+
+    /* Header */
+    .logo{text-align:center;margin-bottom:2rem}
+    .logo a{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);display:inline-block}
+    .logo a span{color:var(--accent)}
+
+    /* Card */
+    .card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:14px;padding:1.5rem;margin-bottom:1rem;
+    }
+
+    /* State visibility */
+    .state{display:none}
+    .state.active{display:block}
+
+    /* Input state */
+    .state-input h2{font-size:1.5rem;text-align:center;margin-bottom:0.3rem}
+    .state-input .sub{text-align:center;color:var(--muted);font-size:0.85rem;margin-bottom:1.2rem}
+    .url-input{
+      width:100%;padding:0.7rem 0.9rem;background:var(--bg);
+      border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-size:0.82rem;font-family:monospace;
+      transition:border-color 0.2s;
+    }
+    .url-input:focus{border-color:var(--accent);outline:none}
+    .url-input::placeholder{color:var(--dim);font-size:0.75rem}
+    .btn{
+      display:block;width:100%;padding:0.75rem;border:none;border-radius:8px;
+      font-weight:700;font-size:0.9rem;cursor:pointer;transition:all 0.2s;
+      font-family:'DM Sans',sans-serif;margin-top:0.75rem;
+    }
+    .btn-primary{background:var(--accent);color:#020617}
+    .btn-primary:hover{box-shadow:0 0 20px rgba(34,197,94,0.3)}
+    .btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+    .btn-purple{background:var(--purple);color:#fff}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+    .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+    .trust{text-align:center;color:var(--dim);font-size:0.7rem;margin-top:0.6rem}
+
+    /* Error inline */
+    .error-msg{
+      color:var(--red);font-size:0.75rem;margin-top:0.4rem;display:none;
+    }
+    .error-msg.show{display:block}
+
+    /* Progress state */
+    .progress-steps{list-style:none}
+    .progress-steps li{
+      display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;
+      font-size:0.82rem;color:var(--muted);
+    }
+    .progress-steps li.done{color:var(--text)}
+    .progress-steps li.done::before{content:'✓';color:var(--accent);font-weight:700}
+    .progress-steps li.current{color:var(--text);font-weight:600}
+    .progress-steps li.current::before{content:'⏳';animation:pulse 1.5s infinite}
+    .progress-steps li.pending{color:var(--dim)}
+    .progress-steps li.pending::before{content:'○'}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+    .progress-bar{
+      width:100%;height:3px;background:var(--border);border-radius:2px;margin-top:0.75rem;
+    }
+    .progress-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.3s}
+
+    /* Preview state */
+    .preview-grid{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));
+      gap:0.4rem;margin-bottom:1rem;
+    }
+    .preview-slide{
+      aspect-ratio:16/9;background:var(--bg);border:1px solid var(--border);
+      border-radius:6px;display:flex;align-items:center;justify-content:center;
+      font-size:0.6rem;color:var(--dim);position:relative;overflow:hidden;
+    }
+    .preview-slide::after{
+      content:'PREVIEW';position:absolute;color:rgba(34,197,94,0.15);
+      font-size:0.6rem;font-weight:700;letter-spacing:0.1em;
+      transform:rotate(-20deg);
+    }
+    .key-input{
+      width:100%;padding:0.6rem 0.8rem;background:var(--bg);
+      border:1px solid var(--border);border-radius:8px;
+      color:var(--text);font-size:0.78rem;font-family:monospace;
+      text-align:center;
+    }
+    .key-input:focus{border-color:var(--purple);outline:none}
+    .key-row{display:flex;gap:0.5rem}
+    .key-row .btn{flex:1;margin-top:0;font-size:0.78rem;padding:0.6rem}
+
+    /* Download state */
+    .done-box{text-align:center;padding:1rem 0}
+    .done-box .check{font-size:2.5rem;margin-bottom:0.5rem}
+    .done-box h2{font-size:1.3rem;margin-bottom:0.3rem}
+    .done-box .meta{color:var(--muted);font-size:0.82rem;margin-bottom:1rem}
+    .link-row{display:flex;gap:0.5rem;flex-wrap:wrap}
+    .link-row .btn{flex:1;text-align:center;font-size:0.82rem}
+
+    /* Powered by */
+    .powered{text-align:center;color:var(--dim);font-size:0.65rem;margin-top:1.5rem}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="logo"><a href="https://nerdstudio.online" target="_blank">Nerd<span>Studio</span></a></div>
+
+  <!-- STATE: Input -->
+  <div class="card state state-input active" id="state-input">
+    <h2>Claude Design to Google Slides</h2>
+    <p class="sub">Paste a Claude Design URL. Get a Google Slides file delivered to your Drive. Preview free, subscribe to export.</p>
+    <details style="margin-bottom:0.75rem;font-size:0.75rem;color:var(--muted);background:var(--bg);border-radius:8px;padding:0.6rem 0.8rem;">
+      <summary style="cursor:pointer;font-weight:600;color:var(--text);">How to get your Claude Design URL →</summary>
+      <ol style="margin:0.5rem 0 0 1.2rem;line-height:1.8;">
+        <li>Open your design in <strong>Claude Code</strong></li>
+        <li>Click the <strong>Share</strong> button (top-right of the design preview)</li>
+        <li>Select <strong>"Hand over to Claude Code"</strong></li>
+        <li>Copy the <code style="background:var(--surface);color:var(--accent);padding:0.1rem 0.3rem;border-radius:3px;">api.anthropic.com/v1/design/h/...</code> link</li>
+        <li>Paste it here →</li>
+      </ol>
+    </details>
+    <input class="url-input" id="design-url" type="url"
+           placeholder="https://api.anthropic.com/v1/design/h/..."
+           autocomplete="off" />
+    <div class="error-msg" id="input-error"></div>
+    <button class="btn btn-primary" id="btn-convert" onclick="startConvert()">Convert →</button>
+    <p class="trust">No account needed. Preview first, pay to download.</p>
+
+    <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;text-align:center;">
+      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:0.4rem;">Already subscribed?</p>
+      <div class="key-row">
+        <input class="key-input" id="saved-key" placeholder="pptx-sk-..." style="text-align:center;" />
+        <button class="btn btn-outline" onclick="verifyAndSaveKey()" style="width:auto;padding:0.6rem 1rem;">Verify</button>
+      </div>
+      <div class="error-msg" id="key-error" style="text-align:center;"></div>
+    </div>
+  </div>
+
+  <!-- STATE: Converting -->
+  <div class="card state" id="state-progress">
+    <h2 style="text-align:center;font-size:1.2rem;">Converting...</h2>
+    <ul class="progress-steps" id="progress-steps">
+      <li class="pending" data-step="fetching">Mendownload bundle</li>
+      <li class="pending" data-step="extracting">Mengekstrak HTML</li>
+      <li class="pending" data-step="converting">Mengkonversi slide</li>
+      <li class="pending" data-step="uploading">Menyimpan file</li>
+    </ul>
+    <div class="progress-bar"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <!-- STATE: Preview -->
+  <div class="card state" id="state-preview">
+    <h2 style="text-align:center;font-size:1.2rem;">Preview</h2>
+    <p class="sub" id="preview-info"></p>
+    <div class="preview-grid" id="preview-grid"></div>
+    <p style="text-align:center;color:var(--muted);font-size:0.75rem;">Watermarked preview</p>
+
+    <button class="btn btn-purple" id="btn-pay" onclick="startPayment()">Unlock Download — from $3/mo</button>
+    <p style="text-align:center;color:var(--dim);font-size:0.65rem;margin:0.4rem 0;">or enter your license key</p>
+    <div class="key-row">
+      <input class="key-input" id="unlock-key" placeholder="pptx-sk-..." style="text-align:center;" />
+      <button class="btn btn-outline" onclick="unlockDownload()" style="width:auto;padding:0.6rem 1rem;">Unlock</button>
+    </div>
+    <div class="error-msg" id="unlock-error" style="text-align:center;"></div>
+  </div>
+
+  <!-- STATE: Download -->
+  <div class="card state" id="state-download">
+    <div class="done-box">
+      <div class="check">✅</div>
+      <h2>Google Slides Ready</h2>
+      <p class="meta" id="download-info"></p>
+      <div style="margin-top:0.75rem;">
+        <input class="key-input" id="gmail-input" type="email" placeholder="your@gmail.com" style="margin-bottom:0.5rem;" />
+        <p style="color:var(--dim);font-size:0.65rem;margin-bottom:0.5rem;">Enter your Gmail — we'll send the Slides to your Drive and transfer ownership to you.</p>
+      </div>
+      <div class="link-row">
+        <a class="btn btn-primary" id="slides-link" href="#" target="_blank">Open in Google Slides</a>
+        <a class="btn btn-outline" id="download-link" href="#">Download PPTX</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE: Error -->
+  <div class="card state" id="state-error">
+    <h2 style="text-align:center;color:var(--red);font-size:1.2rem;">Conversion Failed</h2>
+    <p class="sub" id="error-message"></p>
+    <button class="btn btn-primary" onclick="resetToInput()">Try Again</button>
+  </div>
+
+  <p class="powered">Powered by Nerd Studio · <a href="https://nerdstudio.online">nerdstudio.online</a></p>
+</div>
+
+<script>
+let currentJobId = null;
+let currentJobResult = null;
+let activeLicense = localStorage.getItem('pptx-key') || '';
+
+// Init — check saved key
+if (activeLicense) {
+  fetch('/verify-key', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({key:activeLicense})
+  }).then(r=>r.json()).then(data=>{
+    if (data.valid) {
+      document.getElementById('saved-key').value = activeLicense;
+      document.getElementById('saved-key').style.borderColor = 'var(--accent)';
+    } else {
+      localStorage.removeItem('pptx-key');
+      activeLicense = '';
+    }
+  }).catch(()=>{});
+}
+
+function showState(name) {
+  document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('state-' + name);
+  if (el) el.classList.add('active');
+}
+
+function resetToInput() {
+  currentJobId = null;
+  currentJobResult = null;
+  showState('input');
+}
+
+function startConvert() {
+  const url = document.getElementById('design-url').value.trim();
+  const errEl = document.getElementById('input-error');
+  errEl.classList.remove('show');
+
+  if (!url) { errEl.textContent = 'URL tidak boleh kosong'; errEl.classList.add('show'); return; }
+  if (!url.startsWith('https://api.anthropic.com/v1/design/h/') && !url.includes('claude.ai') && !url.includes('design')) {
+    errEl.textContent = 'URL harus dari Claude Design (api.anthropic.com/v1/design/h/...)';
+    errEl.classList.add('show');
+    return;
+  }
+
+  showState('progress');
+  document.getElementById('btn-convert').disabled = true;
+
+  fetch('/convert', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({designURL: url})
+  }).then(r => r.json()).then(data => {
+    if (data.error) {
+      showError(data.error, false); return;
+    }
+    currentJobId = data.id;
+    listenSSE(data.streamURL);
+  }).catch(e => showError(e.message, true));
+}
+
+function listenSSE(streamURL) {
+  const es = new EventSource(streamURL);
+  const steps = {};
+  const progressMap = {fetching:10, extracting:25, converting:55, uploading:85};
+
+  es.onmessage = (e) => {
+    const data = JSON.parse(e.data);
+    const stageEl = document.querySelector(`[data-step="${data.stage}"]`);
+
+    if (data.stage === 'error') {
+      es.close();
+      showError(data.message, data.retry);
+      return;
+    }
+
+    if (data.stage === 'done') {
+      es.close();
+      document.getElementById('progress-fill').style.width = '100%';
+      setTimeout(() => showPreview(data), 500);
+      return;
+    }
+
+    // Update progress steps
+    const stages = ['fetching','extracting','converting','uploading'];
+    let currentIdx = stages.indexOf(data.stage);
+    stages.forEach((s, i) => {
+      const el = document.querySelector(`[data-step="${s}"]`);
+      if (!el) return;
+      el.className = i < currentIdx ? 'done' : i === currentIdx ? 'current' : 'pending';
+    });
+    document.getElementById('progress-fill').style.width = (progressMap[data.stage] || 50) + '%';
+  };
+
+  es.onerror = () => { es.close(); showError('Koneksi terputus. Coba lagi.', true); };
+}
+
+function showPreview(data) {
+  currentJobResult = data;
+  document.getElementById('preview-info').textContent = `${data.slideCount} slides · ${Math.round(data.elapsed/1000)}s`;
+  const grid = document.getElementById('preview-grid');
+  grid.innerHTML = '';
+
+  // Show real thumbnail if available
+  if (data.thumbnailURL) {
+    const img = document.createElement('img');
+    img.src = data.thumbnailURL;
+    img.alt = 'Slide preview';
+    img.style.width = '100%';
+    img.style.borderRadius = '8px';
+    img.style.border = '1px solid var(--border)';
+    img.style.opacity = '0.6';
+    grid.appendChild(img);
+    grid.style.gridTemplateColumns = '1fr';
+  } else {
+    // Fallback: numbered placeholders
+    for (let i=1; i<=Math.min(data.slideCount, 12); i++) {
+      const div = document.createElement('div');
+      div.className = 'preview-slide';
+      div.textContent = `Slide ${i}`;
+      grid.appendChild(div);
+    }
+    if (data.slideCount > 12) {
+      const more = document.createElement('div');
+      more.className = 'preview-slide';
+      more.textContent = `+${data.slideCount-12}`;
+      grid.appendChild(more);
+    }
+    grid.style.gridTemplateColumns = 'repeat(auto-fill,minmax(80px,1fr))';
+  }
+  document.getElementById('btn-pay').dataset.jobId = currentJobId;
+  showState('preview');
+}
+
+function showError(msg, retry) {
+  document.getElementById('error-message').textContent = msg;
+  showState('error');
+  if (retry) {
+    const btn = document.querySelector('#state-error .btn');
+    btn.textContent = 'Try Again';
+  }
+}
+
+function startPayment() {
+  // Opens Lemon Squeezy checkout in new tab
+  // Replace with actual Lemon Squeezy checkout URL
+  window.open('https://nerdstudio.lemonsqueezy.com/checkout/buy/59b1a9fd-fc2a-490b-9c1c-2bfcad49ee43', '_blank');
+  alert('After payment, enter your license key below to unlock the download.');
+}
+
+function verifyAndSaveKey() {
+  const key = document.getElementById('saved-key').value.trim();
+  const errEl = document.getElementById('key-error');
+  errEl.classList.remove('show');
+  if (!key) { errEl.textContent='Enter your key'; errEl.classList.add('show'); return; }
+
+  fetch('/verify-key', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({key})
+  }).then(r=>r.json()).then(data=>{
+    if (data.valid) {
+      localStorage.setItem('pptx-key', key);
+      activeLicense = key;
+      document.getElementById('saved-key').style.borderColor = 'var(--accent)';
+      errEl.textContent = 'Key verified! ✓';
+      errEl.style.color = 'var(--accent)';
+      errEl.classList.add('show');
+    } else {
+      errEl.textContent = 'Invalid or expired key';
+      errEl.classList.add('show');
+    }
+  }).catch(()=>{
+    errEl.textContent = 'Verification failed. Try again.';
+    errEl.classList.add('show');
+  });
+}
+
+function unlockDownload() {
+  const key = document.getElementById('unlock-key').value.trim() || activeLicense;
+  const errEl = document.getElementById('unlock-error');
+  errEl.classList.remove('show');
+  if (!key) { errEl.textContent='Enter your license key'; errEl.classList.add('show'); return; }
+
+  fetch('/verify-key', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({key})
+  }).then(r=>r.json()).then(data=>{
+    if (!data.valid) {
+      errEl.textContent = 'Invalid or expired key. Subscribe from $3/mo.';
+      errEl.classList.add('show');
+      return;
+    }
+    localStorage.setItem('pptx-key', key);
+    activeLicense = key;
+
+    // Proceed to download
+    const gmail = document.getElementById('gmail-input')?.value?.trim() || '';
+    document.getElementById('download-info').textContent =
+      `${currentJobResult.slideCount} slides · ${Math.round(currentJobResult.elapsed/1000)}s`;
+    let dlUrl = `/download/${currentJobId}?key=${key}`;
+    if (gmail) dlUrl += `&email=${encodeURIComponent(gmail)}`;
+    document.getElementById('download-link').href = dlUrl;
+    if (currentJobResult.slidesURL) {
+      document.getElementById('slides-link').href = currentJobResult.slidesURL;
+      document.getElementById('slides-link').style.display = '';
+    } else {
+      document.getElementById('slides-link').style.display = 'none';
+    }
+    showState('download');
+  }).catch(()=>{
+    errEl.textContent = 'Verification failed. Try again.';
+    errEl.classList.add('show');
+  });
+}
+</script>
+</body>
+</html>

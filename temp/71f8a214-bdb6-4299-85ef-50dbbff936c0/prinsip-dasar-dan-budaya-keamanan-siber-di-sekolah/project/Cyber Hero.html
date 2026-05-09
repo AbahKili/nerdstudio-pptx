@@ -1,0 +1,1647 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<title>Menjadi Cyber Hero — Prinsip Dasar & Budaya Keamanan Siber</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="deck-stage.js"></script>
+<script>
+  const TWEAKS = /*EDITMODE-BEGIN*/{
+    "accentColor": "#FF8A1E",
+    "mascotSize": 100,
+    "showMascotDisc": true,
+    "showFooterLogos": true,
+    "showBugBountyBadge": true,
+    "headingWeight": 900
+  }/*EDITMODE-END*/;
+</script>
+<style>
+  :root {
+    --navy: #071C4D;
+    --navy-2: #0A2A6B;
+    --blue: #1649C7;
+    --blue-2: #2C6BF0;
+    --cyan: #6FB3FF;
+    --orange: #FF8A1E;
+    --orange-2: #FFB547;
+    --cream: #FFF4E6;
+    --paper: #F6F1E8;
+    --ink: #0B1538;
+    --white: #FFFFFF;
+  }
+  html, body { margin: 0; padding: 0; background: #000; }
+  body { font-family: 'Inter', sans-serif; color: var(--ink); }
+
+  deck-stage section {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .slide {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    padding: 0;
+  }
+  .slide .inner {
+    position: absolute;
+    inset: 0;
+    padding: 80px 110px 90px 110px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  /* Top bar: slide number + section label */
+  .topbar {
+    position: absolute;
+    top: 46px; left: 110px; right: 110px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    letter-spacing: 0.18em;
+    color: var(--navy);
+    text-transform: uppercase;
+    z-index: 10;
+  }
+  .topbar .num { font-weight: 700; color: var(--orange); }
+  .topbar .title-k { font-weight: 500; color: rgba(7,28,77,0.55); }
+
+  /* Bottom bar with logos and hashtag */
+  .footer {
+    position: absolute;
+    bottom: 36px; left: 110px; right: 110px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+  }
+  .footer .brand {
+    display: flex; align-items: center; gap: 28px;
+    opacity: 0.95;
+  }
+  .footer .brand img { height: 42px; display: block; }
+  .footer .brand img.ramah { height: 38px; }
+  .footer .brand img.pendidikan { height: 36px; }
+  .footer .brand img.tutwuri { height: 48px; }
+  .footer .brand .divider {
+    width: 1px; height: 28px; background: rgba(7,28,77,0.2);
+  }
+  .footer .hash {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.04em;
+    color: rgba(7,28,77,0.55);
+  }
+
+  h1, h2, h3 { margin: 0; font-family: 'Montserrat', sans-serif; }
+  h1 { font-weight: 900; letter-spacing: -0.02em; line-height: 0.98; }
+  h2 { font-weight: 800; letter-spacing: -0.015em; line-height: 1.02; }
+  p { margin: 0; }
+
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 700;
+  }
+
+  /* Dark slides */
+  .slide.dark { background: var(--navy); color: var(--white); }
+  .slide.dark .topbar { color: rgba(255,255,255,0.85); }
+  .slide.dark .topbar .num { color: var(--orange-2); }
+  .slide.dark .topbar .title-k { color: rgba(255,255,255,0.55); }
+  .slide.dark .footer .brand .divider { background: rgba(255,255,255,0.2); }
+  .slide.dark .footer .hash { color: rgba(255,255,255,0.55); }
+  .slide.dark .footer .brand img { filter: brightness(0) invert(1); opacity: 0.9; }
+
+  /* Blue accent slide */
+  .slide.blue { background: var(--blue); color: var(--white); }
+  .slide.blue .topbar { color: rgba(255,255,255,0.9); }
+  .slide.blue .topbar .num { color: var(--orange-2); }
+  .slide.blue .topbar .title-k { color: rgba(255,255,255,0.6); }
+  .slide.blue .footer .brand .divider { background: rgba(255,255,255,0.22); }
+  .slide.blue .footer .hash { color: rgba(255,255,255,0.65); }
+  .slide.blue .footer .brand img { filter: brightness(0) invert(1); opacity: 0.95; }
+
+  /* Decorative grid BG */
+  .grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+  }
+  .grid-bg.light {
+    background-image:
+      linear-gradient(rgba(7,28,77,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(7,28,77,0.05) 1px, transparent 1px);
+  }
+
+  /* Robot placement helpers */
+  .robot {
+    background: transparent;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+  .slide.dark .robot, .slide.blue .robot {
+    /* over dark, remove whitebg via screen blend will cut; but jpg is warm-white;
+       use a backing disc instead. */
+    mix-blend-mode: normal;
+  }
+  .robot-disc {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, #fff 0%, #F2F7FF 60%, #D8E6FF 100%);
+    box-shadow: 0 20px 80px rgba(7,28,77,0.25), inset 0 -20px 40px rgba(22,73,199,0.08);
+  }
+
+  /* Reusable: bug bounty badge mini */
+  .bb-badge {
+    position: absolute;
+    top: 36px;
+    right: 60px;
+    width: 120px;
+    height: 120px;
+    z-index: 20;
+  }
+  .bb-badge img { width: 100%; height: 100%; display: block; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    border: 2px solid currentColor;
+    border-radius: 999px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .pill .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--orange);
+  }
+
+  /* ============ SLIDE 1: COVER ============ */
+  .s1 .cover-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(1200px 900px at 20% 30%, rgba(22,73,199,0.7) 0%, transparent 60%),
+                radial-gradient(900px 700px at 85% 85%, rgba(255,138,30,0.35) 0%, transparent 55%),
+                var(--navy);
+  }
+  .s1 .stars {
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.6), transparent),
+      radial-gradient(1px 1px at 30% 50%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(2px 2px at 70% 30%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(2px 2px at 60% 10%, rgba(255,255,255,0.5), transparent);
+  }
+  .s1 .title {
+    position: absolute;
+    left: 110px; top: 280px;
+    max-width: 1100px;
+    z-index: 5;
+  }
+  .s1 .title .pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    letter-spacing: 0.3em;
+    color: var(--orange-2);
+    text-transform: uppercase;
+    margin-bottom: 40px;
+  }
+  .s1 .title h1 {
+    font-size: 160px;
+    color: var(--white);
+    line-height: 0.9;
+  }
+  .s1 .title h1 .accent {
+    color: var(--orange);
+    font-style: italic;
+  }
+  .s1 .title .sub {
+    margin-top: 44px;
+    font-size: 34px;
+    line-height: 1.3;
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+    max-width: 900px;
+  }
+  .s1 .robot-wrap {
+    position: absolute;
+    right: 60px;
+    bottom: 0;
+    width: 720px;
+    height: 900px;
+    z-index: 4;
+  }
+  .s1 .robot-disc-big {
+    position: absolute;
+    right: -80px;
+    bottom: -100px;
+    width: 900px;
+    height: 900px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.12) 0%, transparent 65%);
+  }
+  .s1 .robot-wrap img {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    width: 680px;
+    height: 680px;
+    object-fit: contain;
+    mix-blend-mode: screen;
+    filter: contrast(1.08) saturate(1.1);
+  }
+  .s1 .meta {
+    position: absolute;
+    bottom: 160px; left: 110px;
+    display: flex; gap: 40px; align-items: center;
+    color: rgba(255,255,255,0.7);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    z-index: 5;
+  }
+  .s1 .meta span b { color: var(--orange-2); font-weight: 700; }
+
+  /* ============ SLIDE 2: Mengapa Peduli ============ */
+  .s2 .head {
+    margin-top: 60px;
+    max-width: 1100px;
+  }
+  .s2 h1 { font-size: 110px; color: var(--white); letter-spacing: -0.025em; line-height: 0.95; }
+  .s2 .stats {
+    position: absolute;
+    left: 110px; right: 110px; bottom: 140px;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+  }
+  .s2 .stat {
+    padding: 40px 36px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    position: relative;
+  }
+  .s2 .stat .big {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 110px;
+    line-height: 1;
+    color: var(--orange);
+    letter-spacing: -0.03em;
+  }
+  .s2 .stat .lbl {
+    margin-top: 18px;
+    color: rgba(255,255,255,0.9);
+    font-size: 24px;
+    line-height: 1.35;
+    font-weight: 500;
+  }
+  .s2 .stat .arrow {
+    position: absolute; top: 36px; right: 36px;
+    color: var(--orange);
+    font-size: 28px;
+  }
+  .s2 .robo-mini {
+    position: absolute;
+    right: 90px; top: 160px;
+    width: 260px; height: 260px;
+  }
+  .s2 .robo-mini .disc {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, rgba(255,255,255,0.12), transparent 65%);
+  }
+  .s2 .robo-mini img {
+    position: relative;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    mix-blend-mode: screen;
+  }
+
+  /* ============ SLIDE 3: Budaya ============ */
+  .s3 .lead {
+    margin-top: 40px;
+    max-width: 1080px;
+  }
+  .s3 h1 { font-size: 96px; color: var(--navy); letter-spacing: -0.02em; line-height: 0.98; }
+  .s3 .quote {
+    position: absolute;
+    left: 110px; right: 880px; bottom: 200px;
+    padding-left: 40px;
+    border-left: 6px solid var(--orange);
+  }
+  .s3 .quote p {
+    font-size: 32px;
+    line-height: 1.4;
+    color: var(--navy);
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  .s3 .quote p b { font-weight: 700; }
+  .s3 .quote .cap {
+    margin-top: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(7,28,77,0.55);
+  }
+  .s3 .shield-wrap {
+    position: absolute;
+    right: 110px; top: 180px;
+    width: 720px; height: 720px;
+  }
+  .s3 .shield-wrap .disc {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 45%, #E9F0FF 0%, #CFDDF8 60%, #B4C6EC 100%);
+    box-shadow: 0 30px 100px rgba(7,28,77,0.18);
+  }
+  .s3 .shield-wrap img.robot {
+    position: absolute;
+    inset: 40px;
+    width: calc(100% - 80px);
+    height: calc(100% - 80px);
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+  .s3 .orbit {
+    position: absolute;
+    inset: -20px;
+    border-radius: 50%;
+    border: 2px dashed rgba(22,73,199,0.3);
+  }
+  .s3 .orbit-icon {
+    position: absolute;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 2px solid var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--navy);
+    letter-spacing: 0.05em;
+    text-align: center;
+    line-height: 1.1;
+    box-shadow: 0 8px 20px rgba(7,28,77,0.12);
+  }
+
+  /* ============ SLIDE 4 - SECTION DIVIDER: Kenali Musuhmu ============ */
+  .s4 .big-num {
+    position: absolute;
+    left: 110px;
+    top: 120px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 560px;
+    line-height: 0.8;
+    color: rgba(255,255,255,0.08);
+    letter-spacing: -0.04em;
+    z-index: 1;
+  }
+  .s4 .content {
+    position: absolute;
+    left: 110px; top: 420px; max-width: 1200px;
+    z-index: 3;
+  }
+  .s4 .eyebrow {
+    color: var(--orange-2);
+  }
+  .s4 h1 {
+    font-size: 180px;
+    color: var(--white);
+    line-height: 0.88;
+    margin-top: 28px;
+  }
+  .s4 h1 .em { color: var(--orange); font-style: italic; }
+  .s4 .sub {
+    margin-top: 36px;
+    font-size: 30px;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.8);
+    max-width: 950px;
+  }
+  .s4 .robo {
+    position: absolute;
+    right: 40px; bottom: 0;
+    width: 720px; height: 900px;
+    z-index: 2;
+  }
+  .s4 .robo img {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    mix-blend-mode: screen;
+    filter: contrast(1.08) saturate(1.1);
+  }
+
+  /* ============ SLIDE 5: Phishing & Soseng ============ */
+  .s5 h1 { font-size: 80px; color: var(--navy); letter-spacing: -0.02em; line-height: 1; margin-top: 20px; max-width: 1400px; }
+  .s5 .grid {
+    margin-top: 60px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    flex: 1;
+  }
+  .s5 .card {
+    background: var(--white);
+    border: 2px solid var(--navy);
+    padding: 40px 44px;
+    position: relative;
+    display: flex; flex-direction: column;
+    box-shadow: 8px 8px 0 var(--navy);
+  }
+  .s5 .card .tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--orange);
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+  .s5 .card h3 {
+    font-size: 54px;
+    color: var(--navy);
+    font-weight: 900;
+    line-height: 1;
+  }
+  .s5 .card .desc {
+    margin-top: 20px;
+    font-size: 24px; line-height: 1.45;
+    color: rgba(7,28,77,0.8);
+  }
+  .s5 .mock {
+    margin-top: 28px;
+    border: 1px solid rgba(7,28,77,0.2);
+    border-radius: 6px;
+    padding: 20px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    color: var(--navy);
+    background: var(--paper);
+    line-height: 1.5;
+    flex: 1;
+  }
+  .s5 .mock .from { color: rgba(7,28,77,0.6); font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .s5 .mock .subj { color: var(--navy); font-weight: 700; margin-bottom: 10px; }
+  .s5 .mock .link { color: var(--blue); text-decoration: underline; }
+  .s5 .mock .danger { color: var(--orange); font-weight: 700; margin-top: 14px; display: flex; align-items: center; gap: 8px; }
+
+  /* ============ SLIDE 6: Pembajakan & Defacement ============ */
+  .s6 h1 { font-size: 80px; color: var(--navy); line-height: 1; max-width: 1400px; margin-top: 20px; }
+  .s6 .grid2 {
+    margin-top: 64px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 48px;
+  }
+  .s6 .case {
+    border: 2px solid var(--navy);
+    background: var(--white);
+    padding: 36px 40px;
+    box-shadow: 8px 8px 0 var(--orange);
+  }
+  .s6 .case .num-lg {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 64px;
+    color: var(--orange);
+    line-height: 1;
+  }
+  .s6 .case h3 {
+    margin-top: 16px;
+    font-size: 44px;
+    color: var(--navy);
+    font-weight: 900;
+    line-height: 1.05;
+  }
+  .s6 .case .desc { margin-top: 16px; font-size: 22px; line-height: 1.45; color: rgba(7,28,77,0.8); }
+  .s6 .case .screen {
+    margin-top: 24px;
+    border: 1px solid rgba(7,28,77,0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #F0EDE5;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .s6 .case .screen .bar {
+    background: #2A2F3A;
+    padding: 8px 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .s6 .case .screen .bar .dot { width: 10px; height: 10px; border-radius: 50%; background: #555; }
+  .s6 .case .screen .bar .url { color: #AAB2C8; font-size: 14px; margin-left: 12px; }
+  .s6 .case .screen .body { padding: 20px; font-size: 16px; color: var(--navy); line-height: 1.5; }
+  .s6 .case .screen .body.hacked {
+    background: #0A0E1A; color: #FF3D3D;
+    font-weight: 700;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .s6 .case .screen .body.hacked .big { font-size: 36px; letter-spacing: 0.1em; }
+  .s6 .case .screen .body.hacked .sm { color: rgba(255,255,255,0.5); font-size: 14px; margin-top: 8px; }
+  .s6 .case .screen .body.hijack {
+    background: #FFF4E6;
+    padding: 14px;
+  }
+  .s6 .case .screen .body.hijack .row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px; }
+  .s6 .case .screen .body.hijack .row b { color: var(--orange); }
+
+  /* ============ SLIDE 7: Password ============ */
+  .s7 { background: var(--navy); color: var(--white); }
+  .s7 h1 {
+    font-size: 120px;
+    color: var(--white);
+    line-height: 0.95;
+    margin-top: 40px;
+  }
+  .s7 h1 em { color: var(--orange); font-style: italic; }
+  .s7 .compare {
+    margin-top: 70px;
+    display: grid; grid-template-columns: 1fr auto 1fr;
+    gap: 50px;
+    align-items: stretch;
+  }
+  .s7 .pw-card {
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(255,255,255,0.15);
+    padding: 40px;
+    border-radius: 8px;
+    position: relative;
+  }
+  .s7 .pw-card.bad { border-color: rgba(255,61,61,0.5); }
+  .s7 .pw-card.good { border-color: var(--orange); background: rgba(255,138,30,0.08); }
+  .s7 .pw-card .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .s7 .pw-card.bad .lbl { color: #FF6B6B; }
+  .s7 .pw-card.good .lbl { color: var(--orange-2); }
+  .s7 .pw-card .pw {
+    margin-top: 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 72px;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    line-height: 1;
+    word-break: break-all;
+  }
+  .s7 .pw-card.good .pw { color: var(--orange-2); font-size: 58px; }
+  .s7 .pw-card .meta {
+    margin-top: 28px;
+    font-size: 22px;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.75);
+  }
+  .s7 .pw-card .meta .crack { color: #FF6B6B; font-weight: 700; }
+  .s7 .pw-card .meta .safe { color: var(--orange-2); font-weight: 700; }
+  .s7 .vs {
+    align-self: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 60px;
+    color: rgba(255,255,255,0.3);
+  }
+  .s7 .rules {
+    margin-top: 56px;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+  .s7 .rule {
+    display: flex; gap: 20px; align-items: flex-start;
+  }
+  .s7 .rule .n {
+    flex-shrink: 0;
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--orange);
+    color: var(--navy);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: 28px;
+  }
+  .s7 .rule .txt { font-size: 22px; color: rgba(255,255,255,0.9); line-height: 1.4; font-weight: 500; }
+  .s7 .rule .txt b { color: var(--white); font-weight: 700; }
+
+  /* ============ SLIDE 8: Sosmed ============ */
+  .s8 h1 { font-size: 88px; color: var(--navy); line-height: 1; max-width: 1200px; margin-top: 20px; }
+  .s8 .dos-donts {
+    margin-top: 60px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    flex: 1;
+  }
+  .s8 .col h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 48px;
+    display: flex; align-items: center; gap: 18px;
+  }
+  .s8 .col.do h3 { color: #1B8F3A; }
+  .s8 .col.dont h3 { color: #C72538; }
+  .s8 .col h3 .icon {
+    width: 56px; height: 56px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--white);
+    font-weight: 900; font-size: 32px;
+  }
+  .s8 .col.do .icon { background: #1B8F3A; }
+  .s8 .col.dont .icon { background: #C72538; }
+  .s8 .col ul {
+    margin: 36px 0 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .s8 .col li {
+    position: relative;
+    padding: 18px 0 18px 50px;
+    border-bottom: 1px solid rgba(7,28,77,0.1);
+    font-size: 26px;
+    line-height: 1.4;
+    color: var(--navy);
+    font-weight: 500;
+  }
+  .s8 .col li::before {
+    position: absolute;
+    left: 0; top: 22px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--white);
+    font-weight: 900; font-size: 18px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .s8 .col.do li::before { content: "✓"; background: #1B8F3A; }
+  .s8 .col.dont li::before { content: "✕"; background: #C72538; }
+  .s8 .robo-s8 {
+    position: absolute;
+    right: 110px; top: 170px;
+    width: 300px; height: 300px;
+    z-index: 2;
+  }
+  .s8 .robo-s8 .disc {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 50% 45%, #E9F0FF, #CFDDF8);
+  }
+  .s8 .robo-s8 img {
+    position: absolute; inset: 20px;
+    width: calc(100% - 40px); height: calc(100% - 40px);
+    object-fit: contain; mix-blend-mode: multiply;
+  }
+
+  /* ============ SLIDE 9: Kebersihan Perangkat ============ */
+  .s9 h1 { font-size: 96px; color: var(--white); line-height: 0.98; max-width: 1400px; margin-top: 20px; }
+  .s9 .hygiene-grid {
+    margin-top: 70px;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 28px;
+  }
+  .s9 .h-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.14);
+    padding: 40px 32px;
+    border-radius: 6px;
+    min-height: 420px;
+    display: flex; flex-direction: column;
+  }
+  .s9 .h-card .n {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    letter-spacing: 0.2em;
+    color: var(--orange-2);
+    font-weight: 700;
+  }
+  .s9 .h-card .glyph {
+    margin-top: 24px;
+    width: 80px; height: 80px;
+    border: 2px solid var(--orange);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--orange);
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 40px;
+  }
+  .s9 .h-card h3 {
+    margin-top: 28px;
+    font-size: 34px;
+    color: var(--white);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .s9 .h-card .desc {
+    margin-top: 16px;
+    font-size: 20px;
+    line-height: 1.45;
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* ============ SLIDE 10: Insiden ============ */
+  .s10 h1 { font-size: 96px; color: var(--navy); line-height: 1; max-width: 1500px; margin-top: 20px; }
+  .s10 .flow {
+    margin-top: 70px;
+    display: grid; grid-template-columns: 1fr 80px 1fr 80px 1fr;
+    gap: 16px;
+    align-items: stretch;
+  }
+  .s10 .step {
+    background: var(--white);
+    border: 2px solid var(--navy);
+    padding: 36px 30px;
+    position: relative;
+    box-shadow: 6px 6px 0 var(--blue);
+  }
+  .s10 .step .n {
+    position: absolute;
+    top: -24px; left: 24px;
+    width: 56px; height: 56px;
+    background: var(--orange);
+    color: var(--navy);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 28px;
+    border: 3px solid var(--navy);
+  }
+  .s10 .step h3 {
+    margin-top: 24px;
+    font-size: 34px;
+    color: var(--navy);
+    font-weight: 900;
+    line-height: 1.1;
+  }
+  .s10 .step .desc {
+    margin-top: 12px;
+    font-size: 20px;
+    color: rgba(7,28,77,0.8);
+    line-height: 1.4;
+  }
+  .s10 .arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--orange);
+    font-weight: 900;
+    font-size: 48px;
+    font-family: 'Montserrat', sans-serif;
+  }
+  .s10 .legal {
+    position: absolute;
+    bottom: 140px; left: 110px; right: 110px;
+    display: flex; gap: 20px; align-items: center;
+    padding: 26px 32px;
+    background: var(--navy);
+    color: var(--white);
+  }
+  .s10 .legal .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    letter-spacing: 0.25em;
+    color: var(--orange-2);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .s10 .legal .txt { font-size: 22px; line-height: 1.4; }
+  .s10 .legal .txt b { color: var(--orange-2); }
+
+  /* ============ SLIDE 11: Penutup ============ */
+  .s11 .bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(1000px 800px at 80% 40%, rgba(22,73,199,0.5), transparent),
+                radial-gradient(900px 700px at 15% 90%, rgba(255,138,30,0.25), transparent),
+                var(--navy);
+  }
+  .s11 .title-wrap {
+    position: absolute;
+    left: 110px; top: 200px; max-width: 1100px;
+    z-index: 3;
+  }
+  .s11 .topbar { right: 220px; }
+  .s11 .eyebrow { color: var(--orange-2); }
+  .s11 h1 {
+    margin-top: 20px;
+    font-size: 130px;
+    color: var(--white);
+    line-height: 0.9;
+  }
+  .s11 h1 .em { color: var(--orange); font-style: italic; }
+  .s11 .sub {
+    margin-top: 30px;
+    font-size: 26px;
+    line-height: 1.35;
+    color: rgba(255,255,255,0.85);
+    max-width: 820px;
+    font-weight: 500;
+  }
+  .s11 .hero-robo {
+    position: absolute;
+    right: 60px; bottom: 140px;
+    width: 620px; height: 720px;
+    z-index: 2;
+  }
+  .s11 .hero-robo img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    mix-blend-mode: screen;
+    filter: contrast(1.08) saturate(1.1);
+  }
+  .s11 .cta {
+    position: absolute;
+    bottom: 150px; left: 110px;
+    display: flex; align-items: center; gap: 36px;
+    z-index: 4;
+  }
+  .s11 .cta .qr {
+    width: 160px; height: 160px;
+    background: var(--white);
+    padding: 14px;
+    border-radius: 6px;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(12, 1fr);
+    gap: 1px;
+  }
+  .s11 .cta .qr span { background: var(--navy); }
+  .s11 .cta .qr span.w { background: transparent; }
+  .s11 .cta-txt .label { font-family: 'JetBrains Mono', monospace; font-size: 16px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--orange-2); font-weight: 700; }
+  .s11 .cta-txt .big { margin-top: 10px; font-family: 'Montserrat', sans-serif; font-weight: 800; color: var(--white); font-size: 36px; line-height: 1.15; }
+
+  /* ============ SHARED: Section divider block ============ */
+  .section-hero {
+    position: relative;
+  }
+
+  /* ============ SLIDE "AGENDA" — 60 min timeline ============ */
+  .sa h1 { font-size: 96px; color: var(--navy); line-height: 0.98; margin-top: 20px; }
+  .sa .timeline {
+    margin-top: 40px;
+    position: relative;
+    padding-left: 40px;
+  }
+  .sa .timeline::before {
+    content: "";
+    position: absolute;
+    left: 12px; top: 0; bottom: 0;
+    width: 4px; background: var(--orange);
+  }
+  .sa .row {
+    display: grid;
+    grid-template-columns: 170px 1fr 120px;
+    gap: 30px;
+    padding: 0 0 2px 0;
+    border-bottom: 1px solid rgba(7,28,77,0.12);
+    align-items: baseline;
+  }
+  .sa .row:last-child { border-bottom: none; }
+  .sa .row .t {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    color: var(--orange);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    position: relative;
+  }
+  .sa .row .t::before {
+    content: "";
+    position: absolute;
+    left: -40px; top: 12px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--orange);
+    border: 4px solid var(--paper);
+    box-shadow: 0 0 0 2px var(--orange);
+  }
+  .sa .row h4 { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 20px; color: var(--navy); line-height: 1.15; padding: 2px 0; }
+  .sa .row .mins { font-family: 'JetBrains Mono', monospace; font-size: 20px; color: rgba(7,28,77,0.55); text-align: right; }
+
+</style>
+</head>
+<body>
+
+<deck-stage width="1920" height="1080">
+
+<!-- ============================ SLIDE 1: COVER ============================ -->
+<section class="slide s1 dark" data-label="Cover">
+  <div class="cover-bg"></div>
+  <div class="stars"></div>
+  <img class="bb-badge" src="assets/bugbounty.png" alt="Bug Bounty 2026" style="top:40px; right:80px; width:140px; height:140px;" />
+
+  <div class="title">
+    <div class="pre">Prinsip Dasar &amp; Budaya Keamanan Siber</div>
+    <h1>Menjadi<br/><span class="accent">Cyber Hero.</span></h1>
+    <div class="sub">Lindungi dirimu, teman-temanmu, dan sekolahmu<br/>di dunia digital yang tak pernah tidur.</div>
+  </div>
+
+  <div class="robot-wrap">
+    <div class="robot-disc-big"></div>
+    <img src="assets/robot1.jpg" alt="Cyber Hero mascot" />
+  </div>
+
+  <div class="meta">
+    <span>Untuk <b>SMA / SMK</b></span>
+    <span>·</span>
+    <span>Durasi <b>60 Menit</b></span>
+    <span>·</span>
+    <span>Sesi <b>Interaktif</b></span>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="Tut Wuri Handayani" style="filter:none; opacity:1;" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="Kemendikdasmen Ramah" style="filter: brightness(0) invert(1); opacity: 0.9;" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="#PendidikanBermutuUntukSemua" style="filter: brightness(0) invert(1); opacity: 0.9;" />
+    </div>
+    <div class="hash">BUG&nbsp;BOUNTY&nbsp;2026  ·  BUILD CYBER RESILIENCE</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 2: AGENDA (60 min) ============================ -->
+<section class="slide sa" data-label="Agenda 60 Menit">
+  <div class="grid-bg light"></div>
+  <div class="topbar"><span><span class="num">02</span> &nbsp; AGENDA</span><span class="title-k">60&nbsp;MENIT · 10&nbsp;SEGMEN</span></div>
+
+  <div class="inner">
+    <div style="margin-top: 30px; display:flex; justify-content: space-between; align-items: flex-end;">
+      <div>
+        <div class="eyebrow" style="color: var(--orange);">Rundown Sesi</div>
+        <h1>Apa saja yang akan kita<br/>bahas hari ini?</h1>
+      </div>
+      <div style="font-family:'Montserrat'; font-weight:900; font-size: 180px; color: var(--orange); line-height:0.85; letter-spacing: -0.04em;">60′</div>
+    </div>
+
+    <div class="timeline">
+      <div class="row"><div class="t">00′–05′</div><h4>Pembukaan &amp; pengenalan topik</h4><div class="mins">5 menit</div></div>
+      <div class="row"><div class="t">05′–10′</div><h4>Mengapa keamanan siber relevan buat kita</h4><div class="mins">5 menit</div></div>
+      <div class="row"><div class="t">10′–15′</div><h4>Definisi budaya keamanan siber</h4><div class="mins">5 menit</div></div>
+      <div class="row"><div class="t">15′–25′</div><h4>Kenali musuh: phishing &amp; social engineering</h4><div class="mins">10 menit</div></div>
+      <div class="row"><div class="t">25′–32′</div><h4>Pembajakan akun &amp; web defacement</h4><div class="mins">7 menit</div></div>
+      <div class="row"><div class="t">32′–40′</div><h4>Password kuat &amp; multi-factor authentication</h4><div class="mins">8 menit</div></div>
+      <div class="row"><div class="t">40′–50′</div><h4>Etika sosmed &amp; kebersihan perangkat</h4><div class="mins">10 menit</div></div>
+      <div class="row"><div class="t">50′–60′</div><h4>Langkah saat insiden + kuis penutup</h4><div class="mins">10 menit</div></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="Tut Wuri Handayani" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="Kemendikdasmen Ramah" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="#PendidikanBermutuUntukSemua" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 3: Mengapa Peduli (dark) ============================ -->
+<section class="slide s2 dark" data-label="Mengapa Peduli">
+  <div class="grid-bg"></div>
+  <div class="topbar"><span><span class="num">03</span> &nbsp; KONTEKS</span><span class="title-k">MENGAPA&nbsp;HARUS&nbsp;PEDULI</span></div>
+
+  <div class="inner">
+    <div class="head">
+      <div class="eyebrow" style="color: var(--orange-2);">Tren 2026</div>
+      <h1 style="margin-top: 24px;">Sektor <span style="color:var(--orange);">pendidikan</span><br/>jadi target empuk.</h1>
+      <p style="margin-top:28px; font-size:28px; color: rgba(255,255,255,0.75); max-width:900px; line-height:1.4;">
+        Anomali trafik siber nasional terus meningkat — dan sekolah, guru, serta siswa termasuk sasaran yang paling sering dicoba.
+      </p>
+    </div>
+
+    <div class="robo-mini">
+      <div class="disc"></div>
+      <img src="assets/robot2.jpg" alt="" />
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="arrow">↗</div>
+        <div class="big">#1</div>
+        <div class="lbl">Sektor pendidikan masuk kategori target utama serangan siber di Indonesia</div>
+      </div>
+      <div class="stat">
+        <div class="arrow">↗</div>
+        <div class="big">24/7</div>
+        <div class="lbl">Setiap HP aktif adalah permukaan serangan — tidak ada istilah "jam tutup"</div>
+      </div>
+      <div class="stat">
+        <div class="arrow">↗</div>
+        <div class="big">1 klik</div>
+        <div class="lbl">Cukup satu klik ceroboh untuk akun, data, atau nilai hilang</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 4: Budaya ============================ -->
+<section class="slide s3" data-label="Budaya Keamanan Siber">
+  <div class="topbar"><span><span class="num">04</span> &nbsp; FONDASI</span><span class="title-k">BUDAYA&nbsp;KEAMANAN&nbsp;SIBER</span></div>
+
+  <div class="inner">
+    <div class="lead">
+      <div class="eyebrow">Definisi</div>
+      <h1 style="margin-top:24px;">Keamanan bukan aplikasi.<br/>Keamanan adalah <span style="color:var(--orange);">kebiasaan</span>.</h1>
+    </div>
+  </div>
+
+  <div class="shield-wrap">
+    <div class="disc"></div>
+    <img class="robot" src="assets/robot3.jpg" alt="Mascot guarding shield" />
+    <div class="orbit"></div>
+    <div class="orbit-icon" style="top: -20px; left: 50%; transform: translateX(-50%);">ORANG</div>
+    <div class="orbit-icon" style="top: 50%; right: -20px; transform: translateY(-50%);">PROSES</div>
+    <div class="orbit-icon" style="bottom: -20px; left: 50%; transform: translateX(-50%);">TEKNOLOGI</div>
+    <div class="orbit-icon" style="top: 50%; left: -20px; transform: translateY(-50%);">DATA</div>
+  </div>
+
+  <div class="quote">
+    <p><b>Budaya keamanan siber</b> adalah nilai, sikap, dan praktik yang membuat kita melindungi diri sebelum sistem. Tiga pilarnya: <b>orang, proses, teknologi</b> — dan keempatnya tidak akan jalan kalau kita sendiri tidak sadar.</p>
+    <div class="cap">Slide 3 · Definisi kerja untuk sesi ini</div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 5: SECTION DIVIDER — Kenali Musuhmu ============================ -->
+<section class="slide s4 dark section-hero" data-label="Kenali Musuhmu">
+  <div class="grid-bg"></div>
+  <div class="topbar"><span><span class="num">05</span> &nbsp; BAGIAN&nbsp;II</span><span class="title-k">ANCAMAN&nbsp;YANG&nbsp;HARUS&nbsp;DIKENALI</span></div>
+
+  <div class="big-num">05</div>
+
+  <div class="content">
+    <div class="eyebrow">Bagian 2 dari 5</div>
+    <h1>Kenali<br/><span class="em">musuhmu.</span></h1>
+    <div class="sub">Peretas tidak menyerang sistem — mereka menyerang <b>rasa percaya</b>, <b>rasa panik</b>, dan <b>rasa penasaran</b> kita. Kalau kita tahu polanya, kita jauh lebih sulit ditipu.</div>
+  </div>
+
+  <div class="robo">
+    <img src="assets/robot4.jpg" alt="" />
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 6: Phishing & Soseng ============================ -->
+<section class="slide s5" data-label="Phishing &amp; Social Engineering">
+  <div class="topbar"><span><span class="num">06</span> &nbsp; ANCAMAN</span><span class="title-k">PHISHING&nbsp;&amp;&nbsp;SOCIAL&nbsp;ENGINEERING</span></div>
+
+  <div class="inner">
+    <div class="eyebrow">Ancaman #1 &amp; #2</div>
+    <h1>Dua tipuan yang paling sering<br/>kena pelajar Indonesia.</h1>
+
+    <div class="grid">
+      <div class="card">
+        <span class="tag">Phishing</span>
+        <h3>"Verifikasi<br/>akun beasiswa."</h3>
+        <div class="desc">Email atau DM palsu yang memancingmu login lewat halaman tiruan — lalu akunmu dicuri.</div>
+        <div class="mock">
+          <div class="from">DARI: beasiswa-resmi@verify-id.co</div>
+          <div class="subj">⚠ Akunmu akan dibekukan dalam 24 jam</div>
+          <div>Klik tautan berikut untuk konfirmasi identitas:<br/>
+          <span class="link">https://beasiswa-kemendik.verify-id.co/login</span></div>
+          <div class="danger">▲ Domain palsu · Nada mendesak · Link aneh</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <span class="tag">Social Engineering</span>
+        <h3>"Ini undangan<br/>pernikahan.apk"</h3>
+        <div class="desc">Manipulasi psikologis — tergesa, panik, iming-iming hadiah — dikemas dalam file/chat biasa.</div>
+        <div class="mock">
+          <div class="from">WHATSAPP · +62 ••• ••• •214</div>
+          <div class="subj">Bro, undangan nikahan gue ya :)</div>
+          <div>📎 Undangan_Pernikahan_Rina.apk &nbsp;(2.4 MB)<br/>
+          <span style="color:rgba(7,28,77,0.6);">Buka di HP biar langsung lihat detailnya</span></div>
+          <div class="danger">▲ File .APK · Pengirim asing · Memanfaatkan sungkan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 7: Pembajakan & Defacement ============================ -->
+<section class="slide s6" data-label="Pembajakan &amp; Defacement">
+  <div class="topbar"><span><span class="num">07</span> &nbsp; ANCAMAN</span><span class="title-k">PEMBAJAKAN&nbsp;AKUN&nbsp;&amp;&nbsp;WEB&nbsp;DEFACEMENT</span></div>
+
+  <div class="inner">
+    <div class="eyebrow">Ancaman #3 &amp; #4</div>
+    <h1>Ketika akun guru dibajak,<br/>yang rugi adalah kita.</h1>
+
+    <div class="grid2">
+      <div class="case">
+        <div class="num-lg">03</div>
+        <h3>Web Defacement</h3>
+        <div class="desc">Tampilan situs resmi diubah paksa — kadang jadi situs judi, kadang pesan politis. Sistem yang tidak diperbarui adalah pintu terbuka.</div>
+        <div class="screen">
+          <div class="bar">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="url">badanbahasa.sch.id</div>
+          </div>
+          <div class="body hacked">
+            <div class="big">HACKED BY ANON_X</div>
+            <div class="sm">&gt;&gt; your system is outdated &lt;&lt;</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="case">
+        <div class="num-lg">04</div>
+        <h3>Pembajakan Akun</h3>
+        <div class="desc">Akun <i>belajar.id</i> guru diambil alih — nilai, data siswa, dan nama baik sekolah dipakai untuk menyebar hoaks.</div>
+        <div class="screen">
+          <div class="bar">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="url">belajar.id / dashboard</div>
+          </div>
+          <div class="body hijack">
+            <div class="row"><span>Login terakhir</span><b>Jakarta → Moskow</b></div>
+            <div class="row"><span>Perangkat baru</span><b>Unknown Linux</b></div>
+            <div class="row"><span>Password diubah</span><b>3 menit lalu</b></div>
+            <div class="row"><span>Status akun</span><b>DIBAJAK</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 8: Password ============================ -->
+<section class="slide s7 dark" data-label="Password &amp; MFA">
+  <div class="grid-bg"></div>
+  <div class="topbar"><span><span class="num">08</span> &nbsp; PERTAHANAN</span><span class="title-k">PASSWORD&nbsp;&amp;&nbsp;MFA</span></div>
+
+  <div class="inner">
+    <div class="eyebrow" style="color: var(--orange-2);">Kunci Pertama</div>
+    <h1>Password ≥ 12 karakter.<br/>MFA <em>selalu</em> aktif.</h1>
+
+    <div class="compare">
+      <div class="pw-card bad">
+        <div class="lbl">✕ Lemah</div>
+        <div class="pw">12345678</div>
+        <div class="meta">Dijebol dalam <span class="crack">&lt; 1 detik</span> oleh program otomatis. Kombinasi angka berurutan adalah tebakan pertama.</div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="pw-card good">
+        <div class="lbl">✓ Kuat</div>
+        <div class="pw">Rum4h#K3cil_2026!</div>
+        <div class="meta">Perlu <span class="safe">~5 abad</span> untuk dijebol. Gunakan <b>frase</b>, bukan kata — mudah diingat, susah ditebak.</div>
+      </div>
+    </div>
+
+    <div class="rules">
+      <div class="rule">
+        <div class="n">1</div>
+        <div class="txt">Minimal <b>12 karakter</b> — campur huruf besar, kecil, angka, dan simbol.</div>
+      </div>
+      <div class="rule">
+        <div class="n">2</div>
+        <div class="txt">Ganti setiap <b>90 hari</b>. Jangan pakai password yang sama di dua akun.</div>
+      </div>
+      <div class="rule">
+        <div class="n">3</div>
+        <div class="txt">Aktifkan <b>Multi-Factor Authentication</b> — kode OTP di HP adalah kunci kedua.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 9: Etika Sosmed ============================ -->
+<section class="slide s8" data-label="Etika Sosmed">
+  <div class="topbar"><span><span class="num">09</span> &nbsp; PERILAKU</span><span class="title-k">ETIKA&nbsp;&amp;&nbsp;KEAMANAN&nbsp;SOSMED</span></div>
+
+  <div class="inner">
+    <div class="eyebrow">Do &amp; Don't</div>
+    <h1>Data yang kamu unggah,<br/>tidak akan bisa ditarik kembali.</h1>
+
+    <div class="dos-donts">
+      <div class="col do">
+        <h3><span class="icon">✓</span> Do</h3>
+        <ul>
+          <li>Atur privasi akun — batasi siapa yang bisa lihat story</li>
+          <li>Cek dua kali sebelum menerima follow request asing</li>
+          <li>Pikirkan dulu: "apakah ini pantas dibaca orang tuaku?"</li>
+          <li>Laporkan akun yang meniru identitasmu atau gurumu</li>
+        </ul>
+      </div>
+      <div class="col dont" style="padding-right: 380px;">
+        <h3><span class="icon">✕</span> Don't</h3>
+        <ul>
+          <li>Jangan post foto KTP, kartu pelajar, atau tiket pesawat</li>
+          <li>Jangan bagi lokasi <i>real-time</i> ke publik</li>
+          <li>Jangan balas DM "admin" yang minta OTP/password</li>
+          <li>Jangan klik link singkat tanpa tahu tujuannya</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="robo-s8">
+    <div class="disc"></div>
+    <img src="assets/robot1.jpg" alt="" />
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 10: Kebersihan Perangkat ============================ -->
+<section class="slide s9 dark" data-label="Kebersihan Perangkat">
+  <div class="grid-bg"></div>
+  <div class="topbar"><span><span class="num">10</span> &nbsp; KEBIASAAN</span><span class="title-k">CYBER&nbsp;HYGIENE</span></div>
+
+  <div class="inner">
+    <div class="eyebrow" style="color: var(--orange-2);">4 Kebiasaan Harian</div>
+    <h1>Rawat perangkatmu<br/>seperti kamu merawat <span style="color:var(--orange);">gigimu</span>.</h1>
+
+    <div class="hygiene-grid">
+      <div class="h-card">
+        <div class="n">01</div>
+        <div class="glyph">↻</div>
+        <h3>Update rutin</h3>
+        <div class="desc">OS dan aplikasi selalu diperbarui. Update itu menambal lubang keamanan yang baru ditemukan.</div>
+      </div>
+      <div class="h-card">
+        <div class="n">02</div>
+        <div class="glyph">✓</div>
+        <h3>Pakai software resmi</h3>
+        <div class="desc">Bajakan seringkali disisipi virus. Pilih versi gratis resmi atau minta lisensi sekolah.</div>
+      </div>
+      <div class="h-card">
+        <div class="n">03</div>
+        <div class="glyph">⛨</div>
+        <h3>Antivirus aktif</h3>
+        <div class="desc">Cukup satu antivirus tepercaya. Jangan pasang dua — saling blokir malah merugikan.</div>
+      </div>
+      <div class="h-card">
+        <div class="n">04</div>
+        <div class="glyph">≋</div>
+        <h3>Hati-hati Wi-Fi publik</h3>
+        <div class="desc">Boleh buka berita, jangan untuk transaksi bank atau login akun penting. Pakai VPN kalau terpaksa.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 11: Insiden ============================ -->
+<section class="slide s10" data-label="Saat Insiden Terjadi">
+  <div class="topbar"><span><span class="num">11</span> &nbsp; RESPON</span><span class="title-k">SAAT&nbsp;TERJADI&nbsp;INSIDEN</span></div>
+
+  <div class="inner">
+    <div class="eyebrow">Protokol 24 Jam</div>
+    <h1>Kena hack? Jangan panik.<br/>Ikuti tiga langkah ini.</h1>
+
+    <div class="flow">
+      <div class="step">
+        <div class="n">1</div>
+        <h3>Tetap tenang</h3>
+        <div class="desc">Catat apa yang terjadi — jam, perangkat, aplikasi. Jangan hapus buktinya.</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="n">2</div>
+        <h3>Lapor tim IT</h3>
+        <div class="desc">Hubungi guru TIK / admin sekolah atau hotline EduCSIRT. Maksimal <b>24 jam</b>.</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="step">
+        <div class="n">3</div>
+        <h3>Amankan akun</h3>
+        <div class="desc">Ganti password di perangkat aman, aktifkan MFA, logout semua sesi lain.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legal">
+    <div class="tag">UU&nbsp;PDP</div>
+    <div class="txt">Kamu juga dilindungi oleh <b>Undang-Undang Pelindungan Data Pribadi</b>. Lembaga yang lalai menjaga datamu bisa dituntut — ini hakmu, bukan kemurahan hati.</div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">#PRINSIPDASARKEAMANANSIBER</div>
+  </div>
+</section>
+
+<!-- ============================ SLIDE 12: Penutup ============================ -->
+<section class="slide s11 dark" data-label="Penutup — Cyber Hero">
+  <div class="bg"></div>
+  <div class="stars"></div>
+  <img class="bb-badge" src="assets/bugbounty.png" alt="" style="top:40px; right:80px; width:140px; height:140px;" />
+
+  <div class="topbar"><span><span class="num">12</span> &nbsp; PENUTUP</span><span class="title-k">JADI&nbsp;CYBER&nbsp;HERO</span></div>
+
+  <div class="title-wrap">
+    <div class="eyebrow">Satu Prinsip</div>
+    <h1>Jangan tunggu<br/>kena <span class="em">hack</span> dulu<br/>baru sadar.</h1>
+    <div class="sub">Keamanan siber bukan pilihan — ini keharusan. Mulai dari diri sendiri, hari ini juga.</div>
+  </div>
+
+  <div class="hero-robo">
+    <img src="assets/robot1.jpg" alt="" />
+  </div>
+
+  <div class="cta">
+    <div class="qr" aria-label="QR Kuis">
+      <!-- decorative QR-like pattern -->
+      <span></span><span></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span><span></span><span></span><span class="w"></span><span></span><span></span>
+      <span></span><span class="w"></span><span></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span>
+      <span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span><span></span>
+      <span class="w"></span><span class="w"></span><span></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span><span></span><span class="w"></span><span></span><span class="w"></span>
+      <span></span><span></span><span class="w"></span><span></span><span></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span><span></span><span></span>
+      <span></span><span class="w"></span><span></span><span class="w"></span><span></span><span></span><span></span><span class="w"></span><span></span><span></span><span class="w"></span><span></span>
+      <span></span><span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span><span></span><span class="w"></span><span></span><span></span>
+      <span class="w"></span><span></span><span class="w"></span><span></span><span></span><span class="w"></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span><span></span>
+      <span></span><span class="w"></span><span></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span><span></span><span class="w"></span><span></span><span></span>
+      <span></span><span></span><span></span><span class="w"></span><span></span><span></span><span></span><span></span><span></span><span class="w"></span><span></span><span></span>
+      <span></span><span></span><span class="w"></span><span></span><span></span><span></span><span class="w"></span><span></span><span class="w"></span><span></span><span></span><span></span>
+    </div>
+    <div class="cta-txt">
+      <div class="label">Uji Pemahamanmu</div>
+      <div class="big">Scan QR → Kahoot "Cyber Hero Quiz"<br/>atau hubungi EduCSIRT jika butuh bantuan.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="brand">
+      <img class="pendidikan" src="assets/tutwuri.png" alt="" />
+      <div class="divider"></div>
+      <img class="ramah" src="assets/ramah.png" alt="" />
+      <div class="divider"></div>
+      <img class="pendidikan" src="assets/pendidikan.png" alt="" />
+    </div>
+    <div class="hash">TERIMA KASIH · BUG BOUNTY 2026</div>
+  </div>
+</section>
+
+</deck-stage>
+
+<script type="application/json" id="speaker-notes">
+[
+  "Halo semuanya, selamat datang! Coba angkat tangan — siapa di sini yang pagi ini pegang HP sebelum sikat gigi? Hampir semua, kan? Nah, hidup kita sekarang benar-benar pindah ke layar. Mulai dari belajar, jajan, main game, sampai curhat ke teman, semua lewat sana. Hari ini saya akan mengajak kalian selama 60 menit untuk belajar bagaimana caranya jadi Cyber Hero — pahlawan yang melindungi diri sendiri dan orang sekitar di dunia digital. Tenang, nggak bakal membosankan kok, saya janji. Kalian bahkan akan dapat tantangan kecil di akhir.",
+  "Biar teratur, ini peta perjalanan kita selama satu jam ke depan. Kita mulai dari pemanasan — kenapa topik ini penting, apa itu budaya keamanan siber. Lalu kita masuk ke bagian yang paling seru: kenali musuhmu. Kita akan lihat contoh email phishing asli, chat WhatsApp jebakan, dan kasus peretasan akun guru. Setelah itu kita bahas pertahanannya: password, MFA, sosmed, kebersihan perangkat. Ditutup dengan apa yang harus dilakukan kalau kalian sudah kena. Siap? Angka di kanan itu — enam puluh menit — mulai dihitung sekarang.",
+  "Lihat baik-baik. Sektor pendidikan Indonesia sekarang ini target nomor satu serangan siber. Bukan bank, bukan perusahaan besar. Sekolah. Kenapa? Karena sekolah punya banyak data — nilai, NIK siswa, data orang tua — tapi sistem keamanannya sering kurang kuat. HP kalian, akun belajar.id kalian, bahkan WhatsApp grup kelas, semua punya nilai buat pelaku kejahatan siber. Angka dua puluh empat per tujuh itu serius: serangan otomatis jalan terus, nggak peduli jam tiga pagi atau jam sekolah. Dan satu klik itu — itu kenyataan pahit. Satu klik di link yang salah, akun WhatsApp bisa hilang dalam hitungan detik.",
+  "Sekarang pertanyaan mendasar: apa sih budaya keamanan siber itu? Banyak yang kira ini soal antivirus canggih atau aplikasi mahal. Salah. Budaya keamanan itu kebiasaan. Sama seperti kita otomatis pakai helm waktu naik motor — bukan karena ada polisi, tapi karena sadar bahayanya. Ada tiga pilar: orang, proses, teknologi. Teknologi secanggih apapun percuma kalau orangnya masih kasih password ke orang lain. Proses sebagus apapun percuma kalau tidak diikuti. Jadi fondasinya selalu kembali ke kita. Ini pesan utama dari segmen ini: sebelum melindungi sistem, lindungi dulu dirimu.",
+  "Oke, sekarang bagian paling seru. Kita masuk ke dunia para peretas. Tapi ada hal penting yang perlu kalian tahu dulu: peretas modern itu jarang serang sistem. Sistem itu dibangun sama tim IT, ada firewall, ada enkripsi. Yang mereka serang adalah kalian — lebih tepatnya, perasaan kalian. Rasa panik waktu baca ada yang mau bekukan akun kita. Rasa sungkan waktu ada yang minta tolong. Rasa penasaran waktu ada file tidak dikenal. Kalau kalian tahu pola emosi yang mereka pakai, kalian sudah menang setengah jalan. Lanjut, saya tunjukkan dua tipuan yang paling sering kena pelajar Indonesia.",
+  "Dua contoh ini saya ambil dari kasus nyata. Yang kiri: email 'verifikasi beasiswa'. Perhatikan domainnya — verify dash id titik co. Bukan kemdikbud.go.id. Nadanya juga mendesak: dua puluh empat jam atau akun dibekukan. Itu ciri khas phishing — bikin panik, bikin buru-buru. Yang kanan lebih menyedihkan, ini social engineering: chat undangan nikahan dalam bentuk file APK. Begitu di-install, HP kalian bisa langsung dicuri semua datanya, termasuk OTP m-banking orang tua. Aturan emas: kalau file punya ekstensi APK dari nomor asing, jangan dibuka. Titik. Coba diskusi sebentar dengan teman sebelah — pernah dapat yang mirip seperti ini?",
+  "Masih di zona ancaman. Dua kasus ini terjadi di Indonesia, bukan di film. Kiri: web defacement. Situs resmi pemerintah, termasuk kasus Badan Bahasa, tampilannya diubah paksa. Kadang jadi tampilan judi online, kadang pesan politik. Pelajaran pentingnya: situs yang sistemnya tidak pernah di-update itu seperti rumah dengan pintu dibuka terus. Kanan: pembajakan akun belajar.id guru. Begitu akun diambil alih, pelaku bisa ubah nilai, download data ratusan siswa, bahkan kirim hoaks atas nama sekolah. Bayangkan kalau akun wali kelas kalian yang kena. Makanya menjaga akun bukan cuma urusan pribadi — ini urusan komunitas sekolah.",
+  "Sekarang kita masuk ke benteng pertama: password. Siapa yang password-nya masih tanggal lahir, nama pacar, atau angka berurutan seperti ini? Jangan malu, angkat tangan. Ganti hari ini juga. Lihat perbandingannya: delapan angka berurutan itu dijebol dalam waktu kurang dari satu detik oleh program otomatis. Sedangkan yang kanan — 'Rum4h kecil dua puluh dua puluh enam' — butuh lima abad. Tips paling mudah: pakai frase, bukan kata. Kalimat yang personal buat kalian, ganti beberapa huruf jadi angka, tambah simbol. Lalu aktifkan MFA. MFA itu kunci kedua — meskipun password kalian dicuri, peretas tetap butuh HP kalian untuk dapat kodenya. Ini pertahanan paling kuat yang bisa kalian pakai hari ini.",
+  "Media sosial. Ini bagian yang paling dekat dengan keseharian kalian. Aturannya satu kalimat: data yang sudah diunggah, tidak akan bisa ditarik kembali. Meskipun kalian hapus, kemungkinan besar sudah ada yang screenshot. Contoh yang sering saya lihat: story tiket pesawat atau tiket konser. Di barcode tiket itu ada data pribadi yang bisa dipakai orang jahat untuk pesan ulang, batalkan, atau pura-pura jadi kalian. Hal lain: DM 'admin resmi' yang minta OTP. Admin asli tidak pernah minta OTP, tidak pernah. Coba buka HP kalian sekarang — cek pengaturan privasi Instagram atau TikTok kalian. Itu PR kecil dari saya.",
+  "Empat kebiasaan harian. Anggap ini seperti sikat gigi — sederhana tapi kalau tidak dilakukan, rusaknya pelan-pelan. Satu, update rutin. Update itu bukan cuma biar fitur baru — sembilan puluh persennya adalah tambal lubang keamanan. Dua, pakai software resmi. Bajakan sering disisipi malware. Tiga, antivirus aktif, tapi satu saja, jangan dua — nanti saling blokir. Empat, hati-hati Wi-Fi publik. Boleh buka berita, boleh nonton YouTube. Tapi jangan buka m-banking, jangan login akun penting. Kalau terpaksa, pakai VPN. Empat kebiasaan ini kelihatan sepele, tapi bisa menyelamatkan kalian dari sembilan puluh persen serangan umum.",
+  "Segmen terakhir sebelum penutup: bagaimana kalau terlanjur kena? Pertama, jangan panik. Panik bikin kita hapus chat, restart HP, dan hilang bukti. Tetap tenang, catat apa yang terjadi. Kedua, lapor — maksimal dua puluh empat jam. Ke guru TIK, admin sekolah, atau hotline EduCSIRT. Ketiga, amankan: ganti password di perangkat yang aman, aktifkan MFA, logout sesi lain. Satu hal lagi yang penting: kalian dilindungi oleh Undang-Undang Pelindungan Data Pribadi. Kalau ada lembaga — termasuk sekolah atau aplikasi — yang lalai jaga data kalian, mereka bisa dituntut. Ini hak kalian sebagai warga digital, bukan kemurahan hati siapa pun.",
+  "Kita sampai di penutup. Satu pesan yang saya ingin kalian bawa pulang: jangan tunggu kena hack dulu baru sadar. Jadi Cyber Hero itu bukan soal hebat, bukan soal jago IT. Ini soal sadar dan tanggung jawab. Mulai dari hal kecil — ganti password hari ini, aktifkan MFA minggu ini, cek privasi sosmed malam ini. Scan QR di layar untuk ikut kuis interaktif — yang tiga besar dapat apresiasi. Kalau ada pertanyaan apapun, atau kalau kalian butuh bantuan, hubungi EduCSIRT. Kita jaga sekolah kita bersama. Terima kasih sudah mendengarkan, dan selamat jadi Cyber Hero!"
+]
+</script>
+
+<!-- ============================ TWEAKS PANEL ============================ -->
+<div id="tweaks-panel" style="display:none; position:fixed; bottom:80px; right:24px; z-index:2147483500; width:320px; background:#0B1538; color:#fff; border:1px solid rgba(255,255,255,0.14); border-radius:14px; font-family:Inter,system-ui,sans-serif; box-shadow:0 24px 60px rgba(0,0,0,0.5); overflow:hidden;">
+  <div style="padding:16px 20px 12px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+    <div>
+      <div style="font-weight:800; font-size:14px; letter-spacing:0.05em; text-transform:uppercase;">Tweaks</div>
+      <div style="font-size:11px; opacity:0.6; margin-top:2px;">Cyber Hero deck</div>
+    </div>
+    <div style="width:28px; height:28px; border-radius:50%; background:#FF8A1E;"></div>
+  </div>
+  <div style="padding:16px 20px; display:flex; flex-direction:column; gap:18px;">
+
+    <label style="display:flex; flex-direction:column; gap:8px;">
+      <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.15em; opacity:0.7;">Accent color</span>
+      <div id="tw-colors" style="display:flex; gap:10px;">
+        <button data-c="#FF8A1E" title="Orange (default)" style="width:32px; height:32px; border-radius:50%; border:2px solid #fff; background:#FF8A1E; cursor:pointer;"></button>
+        <button data-c="#1649C7" title="Royal blue" style="width:32px; height:32px; border-radius:50%; border:2px solid transparent; background:#1649C7; cursor:pointer;"></button>
+        <button data-c="#6FB3FF" title="Cyan" style="width:32px; height:32px; border-radius:50%; border:2px solid transparent; background:#6FB3FF; cursor:pointer;"></button>
+        <button data-c="#FFB547" title="Warm amber" style="width:32px; height:32px; border-radius:50%; border:2px solid transparent; background:#FFB547; cursor:pointer;"></button>
+        <button data-c="#E63946" title="Alert red" style="width:32px; height:32px; border-radius:50%; border:2px solid transparent; background:#E63946; cursor:pointer;"></button>
+      </div>
+    </label>
+
+    <label style="display:flex; flex-direction:column; gap:6px;">
+      <span style="display:flex; justify-content:space-between; font-size:11px; text-transform:uppercase; letter-spacing:0.15em; opacity:0.7;">
+        <span>Mascot size</span><span id="tw-size-val">100%</span>
+      </span>
+      <input id="tw-size" type="range" min="60" max="130" step="5" value="100" style="accent-color:#FF8A1E;">
+    </label>
+
+    <label style="display:flex; flex-direction:column; gap:6px;">
+      <span style="display:flex; justify-content:space-between; font-size:11px; text-transform:uppercase; letter-spacing:0.15em; opacity:0.7;">
+        <span>Heading weight</span><span id="tw-hw-val">900</span>
+      </span>
+      <input id="tw-hw" type="range" min="600" max="900" step="100" value="900" style="accent-color:#FF8A1E;">
+    </label>
+
+    <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+      <span style="font-size:13px;">Mascot glow disc</span>
+      <input id="tw-disc" type="checkbox" checked style="accent-color:#FF8A1E; width:18px; height:18px;">
+    </label>
+
+    <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+      <span style="font-size:13px;">Show footer logos</span>
+      <input id="tw-footer" type="checkbox" checked style="accent-color:#FF8A1E; width:18px; height:18px;">
+    </label>
+
+    <label style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;">
+      <span style="font-size:13px;">Bug Bounty 2026 badge</span>
+      <input id="tw-badge" type="checkbox" checked style="accent-color:#FF8A1E; width:18px; height:18px;">
+    </label>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  const panel = document.getElementById('tweaks-panel');
+  const size = document.getElementById('tw-size');
+  const sizeVal = document.getElementById('tw-size-val');
+  const hw = document.getElementById('tw-hw');
+  const hwVal = document.getElementById('tw-hw-val');
+  const disc = document.getElementById('tw-disc');
+  const footer = document.getElementById('tw-footer');
+  const badge = document.getElementById('tw-badge');
+  const colors = document.getElementById('tw-colors');
+
+  function applyAll(t){
+    document.documentElement.style.setProperty('--orange', t.accentColor);
+    document.documentElement.style.setProperty('--orange-2', t.accentColor);
+    document.documentElement.style.setProperty('--mascot-scale', (t.mascotSize/100));
+    document.documentElement.style.setProperty('--heading-weight', t.headingWeight);
+    document.body.classList.toggle('no-disc', !t.showMascotDisc);
+    document.body.classList.toggle('no-footer', !t.showFooterLogos);
+    document.body.classList.toggle('no-badge', !t.showBugBountyBadge);
+    // Sync inputs
+    size.value = t.mascotSize; sizeVal.textContent = t.mascotSize + '%';
+    hw.value = t.headingWeight; hwVal.textContent = t.headingWeight;
+    disc.checked = !!t.showMascotDisc;
+    footer.checked = !!t.showFooterLogos;
+    badge.checked = !!t.showBugBountyBadge;
+    colors.querySelectorAll('button').forEach(b => {
+      b.style.borderColor = (b.dataset.c.toLowerCase() === t.accentColor.toLowerCase()) ? '#fff' : 'transparent';
+    });
+  }
+
+  function persist(edits){
+    Object.assign(TWEAKS, edits);
+    window.parent.postMessage({type:'__edit_mode_set_keys', edits: edits}, '*');
+    applyAll(TWEAKS);
+  }
+
+  colors.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-c]');
+    if(!btn) return;
+    persist({accentColor: btn.dataset.c});
+  });
+  size.addEventListener('input', () => { sizeVal.textContent = size.value + '%'; persist({mascotSize: Number(size.value)}); });
+  hw.addEventListener('input', () => { hwVal.textContent = hw.value; persist({headingWeight: Number(hw.value)}); });
+  disc.addEventListener('change', () => persist({showMascotDisc: disc.checked}));
+  footer.addEventListener('change', () => persist({showFooterLogos: footer.checked}));
+  badge.addEventListener('change', () => persist({showBugBountyBadge: badge.checked}));
+
+  // Register listener BEFORE announcing availability
+  window.addEventListener('message', (e) => {
+    if(!e.data || typeof e.data !== 'object') return;
+    if(e.data.type === '__activate_edit_mode') panel.style.display = 'block';
+    else if(e.data.type === '__deactivate_edit_mode') panel.style.display = 'none';
+  });
+  window.parent.postMessage({type:'__edit_mode_available'}, '*');
+
+  // Apply initial tweaks
+  applyAll(TWEAKS);
+})();
+</script>
+
+<style>
+  /* Tweakable hooks */
+  .robot-wrap img, .hero-robo img, .robo img, .robo-mini img, .robo-s8 img, .shield-wrap img.robot {
+    transform: scale(var(--mascot-scale, 1));
+    transform-origin: center;
+    transition: transform 260ms ease;
+  }
+  h1, h2, h3, .s2 .stat .big, .s11 h1, .s4 h1, .s1 .title h1 {
+    font-weight: var(--heading-weight, 900) !important;
+  }
+  body.no-disc .robot-disc-big,
+  body.no-disc .s2 .robo-mini .disc,
+  body.no-disc .s3 .shield-wrap .disc,
+  body.no-disc .s8 .robo-s8 .disc { display: none; }
+  body.no-footer .footer { display: none !important; }
+  body.no-badge .bb-badge { display: none !important; }
+</style>
+
+</body>
+</html>
