@@ -4,8 +4,8 @@ const path = require('path');
 const fetch = require('node-fetch');
 
 const TOKEN_FILE = '/root/nerdy-fellow/google-token.json';
-const CLIENT_ID = 'REDACTED';
-const CLIENT_SECRET = 'REDACTED';
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 
 let cachedToken = null;
 
