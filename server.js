@@ -362,20 +362,33 @@ app.post('/webhook/ls', (req, res) => {
   }
 
   const event = req.body;
-  if (event?.meta?.event_name !== 'order_created' && event?.meta?.event_name !== 'subscription_created') return;
+  const eventName = event?.meta?.event_name;
+  if (!eventName) return;
 
   const email = event.data?.attributes?.user_email;
   const variantName = (event.data?.attributes?.variant_name || 'starter').toLowerCase();
-  const tiers = { starter: 5, pro: 20, unlimited: -1 };
-  const maxMonthly = tiers[variantName] || 5;
-  const expiresAt = new Date(Date.now() + 31 * 24 * 60 * 60 * 1000).toISOString();
-  const key = genKey();
+  if (!email) return;
 
-  db.createLicense({ key, email, tier: variantName, maxMonthly, expiresAt });
-  console.log(`[webhook] License created: ${key} for ${email} (${variantName})`);
+  const grantEvents = ['order_created', 'subscription_created', 'subscription_payment_success', 'subscription_resumed', 'subscription_unpaused', 'subscription_payment_recovered'];
+  const revokeEvents = ['subscription_expired', 'subscription_cancelled', 'subscription_payment_refunded', 'order_refunded'];
+  const planChangeEvents = ['subscription_updated', 'subscription_plan_changed'];
 
-  // Fire-and-forget WA notification
-  notifyWA(`[PPTX] New subscriber! ${email} — ${variantName} (key: ${key})`).catch(() => {});
+  if (grantEvents.includes(eventName) || planChangeEvents.includes(eventName)) {
+    const tiers = { starter: 5, pro: 20, unlimited: -1 };
+    const maxMonthly = tiers[variantName] || 5;
+    const isAnnual = variantName.includes('annual');
+    const isLifetime = variantName.includes('lifetime');
+    const expiresAt = isLifetime ? null : new Date(Date.now() + (isAnnual ? 366 : 31) * 24 * 3600 * 1000).toISOString();
+    const key = genKey();
+    db.createLicense({ key, email, tier: variantName, maxMonthly, expiresAt });
+    console.log(`[webhook] License granted: ${key} for ${email} (${variantName}) — ${eventName}`);
+    notifyWA(`[PPTX] New subscriber! ${email} — ${variantName} (key: ${key})`).catch(() => {});
+  } else if (revokeEvents.includes(eventName)) {
+    db.revokeLicense(email);
+    console.log(`[webhook] License revoked: ${email} (${eventName})`);
+  } else {
+    console.log(`[webhook] Info: ${email} — ${eventName} (${variantName})`);
+  }
 });
 
 // Health check

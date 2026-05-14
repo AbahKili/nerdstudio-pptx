@@ -63,4 +63,7 @@ function createLicense({ key, email, tier, maxMonthly, expiresAt }) {
   `).run(key, email, tier, maxMonthly, expiresAt);
 }
 
-module.exports = { init, verifyKey, checkQuota, recordConversion, createLicense };
+function revokeLicense(email) {
+  db.prepare('DELETE FROM licenses WHERE email = ?').run(email);
+}
+module.exports = { init, verifyKey, checkQuota, recordConversion, createLicense, revokeLicense };
